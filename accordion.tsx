@@ -1,128 +1,140 @@
-import React, { useState } from "react";
-import { Link } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Tag, ChevronDown, ChevronUp, BookOpen, TrendingUp, ArrowRight } from "lucide-react";
-import { blogPosts } from "@/lib/blog-data";
+import React, { useState, useMemo } from "react";
+import { Progress } from "@/components/ui/progress";
+import { DayCard } from "./day-card";
+import { AdPlaceholder } from "./ad-placeholder";
+import { PdfDownloadButton } from "./pdf-download-button";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
+import type { RoadmapResult } from "@workspace/api-client-react/src/generated/api.schemas";
+import { motion } from "framer-motion";
 
-function BlogCard({ post, index }: { post: typeof blogPosts[0]; index: number }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.07 }}
-      className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border-l-4 ${post.accentBorder}`}
-      aria-label={post.title}
-    >
-      <div className="px-6 pt-6 pb-4">
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${post.tagColor}`}>
-            <Tag className="w-3 h-3" />
-            {post.tag}
-          </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" />
-            {post.readTime}
-          </span>
-          <span className="text-xs text-muted-foreground">· {post.date}</span>
-        </div>
-
-        <h2 className="text-xl md:text-2xl font-extrabold text-foreground leading-snug mb-3">
-          <span className="mr-2">{post.emoji}</span>
-          {post.title}
-        </h2>
-
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-          {post.intro}
-        </p>
-      </div>
-
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            key="body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="px-6 pb-2 space-y-6 border-t border-border/60 pt-5">
-              {post.sections.map((section, i) => (
-                <div key={i}>
-                  <h3 className={`text-base font-bold mb-2 ${post.accentText}`}>
-                    {section.heading}
-                  </h3>
-                  <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
-                    {section.body}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="px-6 pb-5 flex items-center gap-4 mt-1">
-        <button
-          onClick={() => setExpanded((e) => !e)}
-          className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} hover:underline underline-offset-2 transition-colors focus:outline-none`}
-          aria-expanded={expanded}
-        >
-          {expanded ? (
-            <><ChevronUp className="w-4 h-4" /> Show less</>
-          ) : (
-            <><ChevronDown className="w-4 h-4" /> Read preview</>
-          )}
-        </button>
-
-        <Link
-          href={`/blog/${post.slug}`}
-          className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} hover:underline underline-offset-2 transition-colors ml-auto`}
-        >
-          Full article <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
-    </motion.article>
-  );
+interface RoadmapDisplayProps {
+  roadmap: RoadmapResult;
+  initialCheckedTasks?: string[];
+  onProgressUpdate?: (checkedTasks: string[]) => void;
+  isReadOnly?: boolean;
 }
 
-export function ExploreSkills() {
-  return (
-    <section
-      className="w-full max-w-3xl mx-auto mt-20 mb-10"
-      aria-label="Skill Blog — Trending Skills with Curated Learning Paths"
-    >
-      <header className="mb-10">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full">
-            <TrendingUp className="w-3.5 h-3.5" />
-            Skill Blog
-          </span>
-        </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
-          Top Skills to Learn in 2026
-        </h2>
-        <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl">
-          In-depth, professionally written learning guides for the most in-demand tech skills of 2026 — covering career relevance, core concepts, tools, certifications, and a month-by-month roadmap to job-readiness.
-        </p>
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>{blogPosts.length} guides · Updated May 2026</span>
-          </div>
-          <Link href="/blog" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline underline-offset-2">
-            View all <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </header>
+export function RoadmapDisplay({ roadmap, initialCheckedTasks = [], onProgressUpdate, isReadOnly = false }: RoadmapDisplayProps) {
+  const [checkedTasks, setCheckedTasks] = useState<string[]>(initialCheckedTasks);
 
-      <div className="flex flex-col gap-6">
-        {blogPosts.map((post, i) => (
-          <BlogCard key={post.id} post={post} index={i} />
-        ))}
+  const totalTasks = useMemo(() => {
+    return roadmap.days.reduce((acc, day) => acc + day.tasks.length, 0);
+  }, [roadmap]);
+
+  const progress = totalTasks === 0 ? 0 : Math.round((checkedTasks.length / totalTasks) * 100);
+
+  const handleToggleTask = (taskId: string, checked: boolean) => {
+    const next = checked
+      ? [...checkedTasks, taskId]
+      : checkedTasks.filter((id) => id !== taskId);
+    setCheckedTasks(next);
+    if (onProgressUpdate) {
+      onProgressUpdate(next);
+    }
+  };
+
+  const daysWithAds = useMemo(() => {
+    const elements: React.ReactNode[] = [];
+    const ads = [
+      { type: "course" as const, title: "Master React & TypeScript", description: "Deep dive into building scalable frontend applications with modern tooling.", badge: "Recommended Course" },
+      { type: "adsense" as const, title: "", description: "", badge: "" },
+      { type: "book" as const, title: "Clean Architecture for JS", description: "Learn how to structure your JS applications for long-term maintainability.", badge: "Recommended Book" }
+    ];
+
+    let adIndex = 0;
+
+    roadmap.days.forEach((day, index) => {
+      elements.push(
+        <DayCard
+          key={`day-${day.day}`}
+          day={day}
+          checkedTasks={checkedTasks}
+          onToggleTask={handleToggleTask}
+          index={index}
+          isReadOnly={isReadOnly}
+        />
+      );
+
+      // Insert ad every ~7 days (weekly)
+      if ((index + 1) % 7 === 0 && adIndex < ads.length) {
+        const ad = ads[adIndex];
+        elements.push(
+          <AdPlaceholder
+            key={`ad-${index}`}
+            type={ad.type}
+            title={ad.title}
+            description={ad.description}
+            badge={ad.badge}
+          />
+        );
+        adIndex++;
+      }
+    });
+
+    return elements;
+  }, [roadmap, checkedTasks]);
+
+  return (
+    <div className="w-full max-w-4xl mx-auto space-y-8">
+      {/* Header & Progress */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border rounded-2xl p-6 md:p-8 shadow-sm"
+      >
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
+              <h2 className="text-3xl font-bold tracking-tight">{roadmap.skillName}</h2>
+              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide">
+                {roadmap.experienceLevel}
+              </span>
+            </div>
+            <p className="text-muted-foreground max-w-2xl mb-4">{roadmap.overview}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <PdfDownloadButton
+                roadmap={roadmap}
+                checkedTasks={checkedTasks}
+                size="sm"
+                variant="outline"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.print()}
+                data-testid="button-print-roadmap"
+              >
+                <Printer className="w-4 h-4" />
+                Print Roadmap
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-col items-end shrink-0 bg-muted/50 p-4 rounded-xl border border-border/50">
+            <span className="text-sm font-medium text-muted-foreground mb-1 uppercase tracking-wider">Duration</span>
+            <span className="text-xl font-bold">{roadmap.duration}</span>
+            <span className="text-xs text-muted-foreground mt-1">{roadmap.totalDays} Days Total</span>
+          </div>
+        </div>
+
+        {!isReadOnly && (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-sm font-medium">
+              <span>Overall Progress</span>
+              <span className="text-primary font-bold">{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-3" />
+            <p className="text-xs text-muted-foreground text-right">
+              {checkedTasks.length} of {totalTasks} tasks completed
+            </p>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Days List */}
+      <div className="space-y-6">
+        {daysWithAds}
       </div>
-    </section>
+    </div>
   );
 }

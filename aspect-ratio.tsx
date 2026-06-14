@@ -1,113 +1,125 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, ChevronRight, Trash2, BookOpen, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { RecentRoadmap } from "@/hooks/use-recent-roadmaps";
-import type { RoadmapResult } from "@workspace/api-client-react/src/generated/api.schemas";
+import { useState } from "react";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const LEVEL_COLORS: Record<string, string> = {
-  Beginner: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
-  Intermediate: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
-  Advanced: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400",
-};
+const LABELS = ["Poor", "Fair", "Good", "Great", "Excellent"];
 
-function timeAgo(ts: number): string {
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+interface StarRatingProps {
+  value: number | null;
+  onChange?: (rating: number) => void;
+  readOnly?: boolean;
+  size?: "sm" | "md" | "lg";
+  showLabel?: boolean;
+  className?: string;
 }
 
-interface RecentRoadmapsProps {
-  recent: RecentRoadmap[];
-  onSelect: (roadmap: RoadmapResult) => void;
-  onClear: () => void;
-}
+export function StarRating({
+  value,
+  onChange,
+  readOnly = false,
+  size = "md",
+  showLabel = true,
+  className,
+}: StarRatingProps) {
+  const [hovered, setHovered] = useState<number | null>(null);
 
-export function RecentRoadmaps({ recent, onSelect, onClear }: RecentRoadmapsProps) {
-  if (recent.length === 0) return null;
+  const starSizes = { sm: "w-4 h-4", md: "w-6 h-6", lg: "w-8 h-8" };
+  const gapSizes = { sm: "gap-0.5", md: "gap-1", lg: "gap-1.5" };
+  const starSize = starSizes[size];
+  const gapSize = gapSizes[size];
+
+  const active = hovered ?? value ?? 0;
 
   return (
-    <AnimatePresence>
-      <motion.section
-        key="recent"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="w-full max-w-3xl mx-auto mb-10"
+    <div className={cn("flex flex-col items-start gap-1", className)}>
+      <div
+        className={cn("flex", gapSize)}
+        onMouseLeave={() => !readOnly && setHovered(null)}
+        role={readOnly ? "img" : "radiogroup"}
+        aria-label={`Rating: ${value ?? 0} out of 5`}
       >
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-3 px-1">
-          <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            <Clock className="w-4 h-4" />
-            Recently Generated
-          </div>
-          <button
-            onClick={onClear}
-            className="flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-            title="Clear history"
-          >
-            <Trash2 className="w-3 h-3" />
-            Clear
-          </button>
-        </div>
-
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {recent.map((item, i) => (
-            <motion.button
-              key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              onClick={() => onSelect(item.roadmap)}
-              className="group relative flex flex-col text-left bg-card border border-border rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 overflow-hidden"
+        {[1, 2, 3, 4, 5].map((star) => {
+          const filled = star <= active;
+          return (
+            <button
+              key={star}
+              type="button"
+              disabled={readOnly}
+              onMouseEnter={() => !readOnly && setHovered(star)}
+              onClick={() => !readOnly && onChange?.(star)}
+              aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
+              className={cn(
+                "transition-all duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
+                readOnly ? "cursor-default" : "cursor-pointer hover:scale-110"
+              )}
             >
-              {/* Subtle gradient accent */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+              <Star
+                className={cn(
+                  starSize,
+                  "transition-colors duration-100",
+                  filled
+                    ? "fill-amber-400 text-amber-400"
+                    : "fill-transparent text-muted-foreground/40"
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
 
-              {/* Skill name + arrow */}
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="shrink-0 p-1.5 bg-primary/10 rounded-lg">
-                    <BookOpen className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <span className="font-bold text-sm leading-tight truncate">
-                    {item.skillName}
-                  </span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 mt-0.5 transition-colors" />
-              </div>
+      {showLabel && !readOnly && (
+        <span className="text-xs text-muted-foreground h-4">
+          {hovered
+            ? LABELS[hovered - 1]
+            : value
+            ? `You rated: ${LABELS[value - 1]}`
+            : "Tap to rate this roadmap"}
+        </span>
+      )}
+    </div>
+  );
+}
 
-              {/* Overview */}
-              <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">
-                {item.overview}
-              </p>
+interface RatingWidgetProps {
+  roadmapId: number;
+  initialRating: number | null;
+  onRate: (rating: number) => void;
+  isPending?: boolean;
+}
 
-              {/* Meta row */}
-              <div className="flex items-center gap-2 mt-auto flex-wrap">
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                    LEVEL_COLORS[item.experienceLevel] ?? "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {item.experienceLevel}
-                </span>
-                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <Calendar className="w-3 h-3" />
-                  {item.duration}
-                </span>
-                <span className="ml-auto text-[10px] text-muted-foreground/50">
-                  {timeAgo(item.viewedAt)}
-                </span>
-              </div>
-            </motion.button>
-          ))}
-        </div>
-      </motion.section>
-    </AnimatePresence>
+export function RatingWidget({
+  roadmapId: _roadmapId,
+  initialRating,
+  onRate,
+  isPending = false,
+}: RatingWidgetProps) {
+  const [submitted, setSubmitted] = useState(false);
+  const hasRated = initialRating !== null || submitted;
+
+  const handleRate = (rating: number) => {
+    if (isPending) return;
+    onRate(rating);
+    setSubmitted(true);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 p-4 bg-muted/30 border border-border/60 rounded-xl">
+      <div className="flex items-center gap-2">
+        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+        <span className="text-sm font-semibold">
+          {hasRated ? "Thanks for your rating!" : "Was this roadmap helpful?"}
+        </span>
+        {isPending && (
+          <span className="text-xs text-muted-foreground animate-pulse ml-auto">Saving...</span>
+        )}
+      </div>
+      <StarRating
+        value={initialRating}
+        onChange={handleRate}
+        readOnly={hasRated && !isPending}
+        size="md"
+        showLabel={!hasRated}
+      />
+    </div>
   );
 }

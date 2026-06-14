@@ -1,113 +1,93 @@
-import { Link, useLocation } from "wouter";
-import { Moon, Sun, Map, List, BarChart3, LogIn, LogOut, UserCircle2, BookOpen, TrendingUp } from "lucide-react";
-import { useTheme } from "@/components/theme-provider";
-import { Button } from "@/components/ui/button";
-import { Show, useUser, useClerk } from "@clerk/react";
+import React from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { motion } from "framer-motion";
+import { BookOpen } from "lucide-react";
+import type { RoadmapDay } from "@workspace/api-client-react/src/generated/api.schemas";
 
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+interface DayCardProps {
+  day: RoadmapDay;
+  checkedTasks: string[];
+  onToggleTask?: (taskId: string, checked: boolean) => void;
+  index: number;
+  isReadOnly?: boolean;
+}
 
-export function Navbar() {
-  const { theme, setTheme } = useTheme();
-  const [location] = useLocation();
-  const { user } = useUser();
-  const { signOut } = useClerk();
+export function DayCard({ day, checkedTasks, onToggleTask, index, isReadOnly = false }: DayCardProps) {
+  const allChecked = day.tasks.every((_, taskIndex) => checkedTasks.includes(`day-${day.day}-task-${taskIndex}`));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight text-primary">
-            <Map className="w-6 h-6" />
-            <span>Pathfinder</span>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link href="/" className={`transition-colors hover:text-primary ${location === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
-              Generator
-            </Link>
-            <Link href="/saved" className={`transition-colors hover:text-primary ${location === '/saved' ? 'text-primary' : 'text-muted-foreground'}`}>
-              Saved Roadmaps
-            </Link>
-            <Link href="/stats" className={`transition-colors hover:text-primary ${location === '/stats' ? 'text-primary' : 'text-muted-foreground'}`}>
-              Stats
-            </Link>
-            <Link href="/blog" className={`transition-colors hover:text-primary ${location.startsWith('/blog') ? 'text-primary' : 'text-muted-foreground'}`}>
-              Blog
-            </Link>
-            <Link href="/trending" className={`transition-colors hover:text-primary ${location.startsWith('/trending') ? 'text-primary' : 'text-muted-foreground'}`}>
-              Trending
-            </Link>
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            aria-label="Toggle theme"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      className={`relative rounded-xl border p-6 transition-all duration-300 ${allChecked ? "bg-muted/30 border-primary/20" : "bg-card"}`}
+    >
+      <div className="flex items-baseline justify-between mb-4">
+        <h3 className="text-lg font-bold">
+          <span className="text-primary mr-2">Day {day.day}:</span>
+          {day.title}
+        </h3>
+        {allChecked && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full uppercase tracking-wider"
           >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
+            Completed
+          </motion.span>
+        )}
+      </div>
 
-          <Show when="signed-out">
-            <div className="hidden md:flex items-center gap-2">
-              <Link href="/sign-in">
-                <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button size="sm" className="gap-1.5">
-                  Get Started
-                </Button>
-              </Link>
+      <div className="space-y-3 mb-6">
+        {day.tasks.map((task, taskIndex) => {
+          const taskId = `day-${day.day}-task-${taskIndex}`;
+          const isChecked = checkedTasks.includes(taskId);
+
+          return (
+            <div key={taskId} className="flex items-start gap-3 group">
+              {!isReadOnly ? (
+                <>
+                  <Checkbox
+                    id={taskId}
+                    checked={isChecked}
+                    onCheckedChange={(checked) => onToggleTask?.(taskId, checked as boolean)}
+                    className="mt-1 transition-transform group-active:scale-95"
+                    data-testid={`checkbox-${taskId}`}
+                  />
+                  <label
+                    htmlFor={taskId}
+                    className={`text-sm leading-relaxed cursor-pointer transition-colors ${
+                      isChecked ? "text-muted-foreground line-through" : "text-foreground"
+                    }`}
+                  >
+                    {task}
+                  </label>
+                </>
+              ) : (
+                <div className="text-sm leading-relaxed text-foreground flex items-start">
+                  <span className="mr-2 text-primary/70">•</span>
+                  {task}
+                </div>
+              )}
             </div>
-          </Show>
+          );
+        })}
+      </div>
 
-          <Show when="signed-in">
-            <div className="hidden md:flex items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/50">
-                {user?.imageUrl ? (
-                  <img src={user.imageUrl} alt={user.firstName ?? "User"} className="w-6 h-6 rounded-full object-cover" />
-                ) : (
-                  <UserCircle2 className="w-5 h-5 text-muted-foreground" />
-                )}
-                <span className="text-sm font-medium text-foreground max-w-[120px] truncate">
-                  {user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ?? "User"}
-                </span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5 text-muted-foreground hover:text-foreground"
-                onClick={() => signOut({ redirectUrl: basePath || "/" })}
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </Button>
-            </div>
-          </Show>
-
-          <div className="flex md:hidden items-center gap-1">
-            <Link href="/"><Button variant="ghost" size="icon" className={location === '/' ? 'text-primary' : 'text-muted-foreground'}><Map className="h-5 w-5" /></Button></Link>
-            <Link href="/saved"><Button variant="ghost" size="icon" className={location === '/saved' ? 'text-primary' : 'text-muted-foreground'}><List className="h-5 w-5" /></Button></Link>
-            <Link href="/stats"><Button variant="ghost" size="icon" className={location === '/stats' ? 'text-primary' : 'text-muted-foreground'}><BarChart3 className="h-5 w-5" /></Button></Link>
-            <Link href="/blog"><Button variant="ghost" size="icon" className={location.startsWith('/blog') ? 'text-primary' : 'text-muted-foreground'}><BookOpen className="h-5 w-5" /></Button></Link>
-            <Link href="/trending"><Button variant="ghost" size="icon" className={location.startsWith('/trending') ? 'text-primary' : 'text-muted-foreground'}><TrendingUp className="h-5 w-5" /></Button></Link>
-            <Show when="signed-out">
-              <Link href="/sign-in"><Button variant="ghost" size="icon" className="text-muted-foreground"><LogIn className="h-5 w-5" /></Button></Link>
-            </Show>
-            <Show when="signed-in">
-              <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => signOut({ redirectUrl: basePath || "/" })}>
-                <LogOut className="h-5 w-5" />
-              </Button>
-            </Show>
+      {day.resources && day.resources.length > 0 && (
+        <div className="pt-4 border-t border-border/50">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <BookOpen className="w-3 h-3" /> Recommended Resources
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {day.resources.map((resource, i) => (
+              <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-secondary text-secondary-foreground border border-secondary-border shadow-sm">
+                {resource}
+              </span>
+            ))}
           </div>
         </div>
-      </div>
-    </header>
+      )}
+    </motion.div>
   );
 }

@@ -1,6 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <rect width="48" height="48" rx="12" fill="#2563EB"/>
-  <path d="M24 10L28 20H38L30 26L33 36L24 30L15 36L18 26L10 20H20L24 10Z" fill="white" opacity="0.95"/>
-  <circle cx="24" cy="24" r="4" fill="#2563EB"/>
-  <circle cx="24" cy="24" r="2" fill="white"/>
-</svg>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1"
+    />
+    <title>AI Skill Roadmap Generator</title>
+    <meta
+      name="description"
+      content="AI Skill Roadmap Generator — built on Replit."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="AI Skill Roadmap Generator" />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-K0EH44L03Z"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      // Google ko direct 'granted' signal bhej rahe hain taaki consent verify ho jaye
+      gtag("consent", "default", {
+        ad_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted",
+        analytics_storage: "granted",
+      });
+
+      gtag("config", "G-K0EH44L03Z");
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

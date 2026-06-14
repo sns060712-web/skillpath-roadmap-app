@@ -1,26 +1,67 @@
-import React from "react";
+import { useState } from "react";
+import { pdf } from "@react-pdf/renderer";
+import { Download, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { RoadmapPDF } from "./roadmap-pdf";
+import type { RoadmapResult } from "@workspace/api-client-react/src/generated/api.schemas";
 
-interface AdSenseBannerProps {
-  slot?: string;
+interface PdfDownloadButtonProps {
+  roadmap: RoadmapResult;
+  checkedTasks?: string[];
+  size?: "default" | "sm" | "lg" | "icon";
+  variant?: "default" | "outline" | "secondary" | "ghost";
   className?: string;
-  size?: "banner" | "rectangle" | "halfpage";
 }
 
-export function AdSenseBanner({ slot = "default", className = "", size = "banner" }: AdSenseBannerProps) {
-  const heights: Record<string, string> = {
-    banner: "h-24",
-    rectangle: "h-64",
-    halfpage: "h-[600px]",
+export function PdfDownloadButton({
+  roadmap,
+  checkedTasks = [],
+  size = "default",
+  variant = "outline",
+  className,
+}: PdfDownloadButtonProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleDownload = async () => {
+    setIsGenerating(true);
+    try {
+      const blob = await pdf(
+        <RoadmapPDF roadmap={roadmap} checkedTasks={checkedTasks} />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${roadmap.skillName.replace(/\s+/g, "-").toLowerCase()}-roadmap.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
-    <div
-      id={`adsense-${slot}`}
-      data-ad-slot={slot}
-      className={`w-full ${heights[size]} flex items-center justify-center rounded-xl border border-dashed border-border bg-slate-100 dark:bg-slate-800 text-xs text-muted-foreground uppercase tracking-widest font-medium select-none print:hidden ${className}`}
-      aria-label="Advertisement"
+    <Button
+      onClick={handleDownload}
+      disabled={isGenerating}
+      size={size}
+      variant={variant}
+      className={className}
+      data-testid="button-download-pdf"
     >
-      <span className="opacity-50">Advertisement</span>
-    </div>
+      {isGenerating ? (
+        <>
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Generating PDF...
+        </>
+      ) : (
+        <>
+          <Download className="w-4 h-4" />
+          Download PDF
+        </>
+      )}
+    </Button>
   );
 }

@@ -1,93 +1,113 @@
-import React from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { motion } from "framer-motion";
-import { BookOpen } from "lucide-react";
-import type { RoadmapDay } from "@workspace/api-client-react/src/generated/api.schemas";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clock, ChevronRight, Trash2, BookOpen, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { RecentRoadmap } from "@/hooks/use-recent-roadmaps";
+import type { RoadmapResult } from "@workspace/api-client-react/src/generated/api.schemas";
 
-interface DayCardProps {
-  day: RoadmapDay;
-  checkedTasks: string[];
-  onToggleTask?: (taskId: string, checked: boolean) => void;
-  index: number;
-  isReadOnly?: boolean;
+const LEVEL_COLORS: Record<string, string> = {
+  Beginner: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
+  Intermediate: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
+  Advanced: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400",
+};
+
+function timeAgo(ts: number): string {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export function DayCard({ day, checkedTasks, onToggleTask, index, isReadOnly = false }: DayCardProps) {
-  const allChecked = day.tasks.every((_, taskIndex) => checkedTasks.includes(`day-${day.day}-task-${taskIndex}`));
+interface RecentRoadmapsProps {
+  recent: RecentRoadmap[];
+  onSelect: (roadmap: RoadmapResult) => void;
+  onClear: () => void;
+}
+
+export function RecentRoadmaps({ recent, onSelect, onClear }: RecentRoadmapsProps) {
+  if (recent.length === 0) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      className={`relative rounded-xl border p-6 transition-all duration-300 ${allChecked ? "bg-muted/30 border-primary/20" : "bg-card"}`}
-    >
-      <div className="flex items-baseline justify-between mb-4">
-        <h3 className="text-lg font-bold">
-          <span className="text-primary mr-2">Day {day.day}:</span>
-          {day.title}
-        </h3>
-        {allChecked && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full uppercase tracking-wider"
-          >
-            Completed
-          </motion.span>
-        )}
-      </div>
-
-      <div className="space-y-3 mb-6">
-        {day.tasks.map((task, taskIndex) => {
-          const taskId = `day-${day.day}-task-${taskIndex}`;
-          const isChecked = checkedTasks.includes(taskId);
-
-          return (
-            <div key={taskId} className="flex items-start gap-3 group">
-              {!isReadOnly ? (
-                <>
-                  <Checkbox
-                    id={taskId}
-                    checked={isChecked}
-                    onCheckedChange={(checked) => onToggleTask?.(taskId, checked as boolean)}
-                    className="mt-1 transition-transform group-active:scale-95"
-                    data-testid={`checkbox-${taskId}`}
-                  />
-                  <label
-                    htmlFor={taskId}
-                    className={`text-sm leading-relaxed cursor-pointer transition-colors ${
-                      isChecked ? "text-muted-foreground line-through" : "text-foreground"
-                    }`}
-                  >
-                    {task}
-                  </label>
-                </>
-              ) : (
-                <div className="text-sm leading-relaxed text-foreground flex items-start">
-                  <span className="mr-2 text-primary/70">•</span>
-                  {task}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {day.resources && day.resources.length > 0 && (
-        <div className="pt-4 border-t border-border/50">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <BookOpen className="w-3 h-3" /> Recommended Resources
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {day.resources.map((resource, i) => (
-              <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-secondary text-secondary-foreground border border-secondary-border shadow-sm">
-                {resource}
-              </span>
-            ))}
+    <AnimatePresence>
+      <motion.section
+        key="recent"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="w-full max-w-3xl mx-auto mb-10"
+      >
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <Clock className="w-4 h-4" />
+            Recently Generated
           </div>
+          <button
+            onClick={onClear}
+            className="flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+            title="Clear history"
+          >
+            <Trash2 className="w-3 h-3" />
+            Clear
+          </button>
         </div>
-      )}
-    </motion.div>
+
+        {/* Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {recent.map((item, i) => (
+            <motion.button
+              key={item.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.06 }}
+              onClick={() => onSelect(item.roadmap)}
+              className="group relative flex flex-col text-left bg-card border border-border rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 overflow-hidden"
+            >
+              {/* Subtle gradient accent */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+              {/* Skill name + arrow */}
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="shrink-0 p-1.5 bg-primary/10 rounded-lg">
+                    <BookOpen className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <span className="font-bold text-sm leading-tight truncate">
+                    {item.skillName}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 mt-0.5 transition-colors" />
+              </div>
+
+              {/* Overview */}
+              <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">
+                {item.overview}
+              </p>
+
+              {/* Meta row */}
+              <div className="flex items-center gap-2 mt-auto flex-wrap">
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                    LEVEL_COLORS[item.experienceLevel] ?? "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {item.experienceLevel}
+                </span>
+                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Calendar className="w-3 h-3" />
+                  {item.duration}
+                </span>
+                <span className="ml-auto text-[10px] text-muted-foreground/50">
+                  {timeAgo(item.viewedAt)}
+                </span>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </motion.section>
+    </AnimatePresence>
   );
 }

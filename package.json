@@ -1,82 +1,108 @@
-{
-  "name": "@workspace/roadmap-app",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite --config vite.config.ts --host 0.0.0.0",
-    "build": "vite build --config vite.config.ts",
-    "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
-  "devDependencies": {
-    "@hookform/resolvers": "^3.10.0",
-    "@radix-ui/react-accordion": "^1.2.4",
-    "@radix-ui/react-alert-dialog": "^1.1.7",
-    "@radix-ui/react-aspect-ratio": "^1.1.3",
-    "@radix-ui/react-avatar": "^1.1.4",
-    "@radix-ui/react-checkbox": "^1.1.5",
-    "@radix-ui/react-collapsible": "^1.1.4",
-    "@radix-ui/react-context-menu": "^2.2.7",
-    "@radix-ui/react-dialog": "^1.1.7",
-    "@radix-ui/react-dropdown-menu": "^2.1.7",
-    "@radix-ui/react-hover-card": "^1.1.7",
-    "@radix-ui/react-label": "^2.1.3",
-    "@radix-ui/react-menubar": "^1.1.7",
-    "@radix-ui/react-navigation-menu": "^1.2.6",
-    "@radix-ui/react-popover": "^1.1.7",
-    "@radix-ui/react-progress": "^1.1.3",
-    "@radix-ui/react-radio-group": "^1.2.4",
-    "@radix-ui/react-scroll-area": "^1.2.4",
-    "@radix-ui/react-select": "^2.1.7",
-    "@radix-ui/react-separator": "^1.1.3",
-    "@radix-ui/react-slider": "^1.2.4",
-    "@radix-ui/react-slot": "^1.2.0",
-    "@radix-ui/react-switch": "^1.1.4",
-    "@radix-ui/react-tabs": "^1.1.4",
-    "@radix-ui/react-toast": "^1.2.7",
-    "@radix-ui/react-toggle": "^1.1.3",
-    "@radix-ui/react-toggle-group": "^1.1.3",
-    "@radix-ui/react-tooltip": "^1.2.0",
-    "@replit/vite-plugin-cartographer": "catalog:",
-    "@replit/vite-plugin-dev-banner": "catalog:",
-    "@replit/vite-plugin-runtime-error-modal": "catalog:",
-    "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "catalog:",
-    "@tanstack/react-query": "catalog:",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "catalog:",
-    "@workspace/api-client-react": "workspace:*",
-    "class-variance-authority": "catalog:",
-    "clsx": "catalog:",
-    "cmdk": "^1.1.1",
-    "date-fns": "^3.6.0",
-    "embla-carousel-react": "^8.6.0",
-    "framer-motion": "catalog:",
-    "input-otp": "^1.4.2",
-    "lucide-react": "catalog:",
-    "next-themes": "^0.4.6",
-    "react": "catalog:",
-    "react-day-picker": "^9.11.1",
-    "react-dom": "catalog:",
-    "react-hook-form": "^7.55.0",
-    "react-icons": "^5.4.0",
-    "react-resizable-panels": "^2.1.7",
-    "recharts": "^2.15.2",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "catalog:",
-    "tailwindcss": "catalog:",
-    "tw-animate-css": "^1.4.0",
-    "vaul": "^1.1.2",
-    "vite": "catalog:",
-    "wouter": "^3.3.5",
-    "zod": "catalog:"
-  },
-  "dependencies": {
-    "@clerk/react": "^6.6.6",
-    "@clerk/themes": "^2.4.57",
-    "@react-pdf/renderer": "^4.5.1"
-  }
+import React, { useEffect } from "react";
+import { Link } from "wouter";
+import { motion } from "framer-motion";
+import { Clock, Tag, ArrowRight, TrendingUp, BookOpen } from "lucide-react";
+import { blogPosts } from "@/lib/blog-data";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+export default function Blog() {
+  useEffect(() => {
+    document.title = "Skill Blog — Top Tech Skills to Learn in 2026 | Skill Path AI";
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute(
+      "content",
+      "Professionally written learning guides for the most in-demand tech skills of 2026 — Python, Cyber Security, UI/UX Design, Full-Stack Development, and Data Science.",
+    );
+
+    const ogTitle = document.querySelector('meta[property="og:title"]') || (() => { const m = document.createElement("meta"); m.setAttribute("property", "og:title"); document.head.appendChild(m); return m; })();
+    ogTitle.setAttribute("content", "Skill Blog — Top Tech Skills to Learn in 2026 | Skill Path AI");
+
+    const ogDesc = document.querySelector('meta[property="og:description"]') || (() => { const m = document.createElement("meta"); m.setAttribute("property", "og:description"); document.head.appendChild(m); return m; })();
+    ogDesc.setAttribute("content", "In-depth skill roadmaps covering Python, Cyber Security, UI/UX, Full-Stack Web Dev, and Data Science. Curated for 2026 learners.");
+
+    const ogType = document.querySelector('meta[property="og:type"]') || (() => { const m = document.createElement("meta"); m.setAttribute("property", "og:type"); document.head.appendChild(m); return m; })();
+    ogType.setAttribute("content", "website");
+
+    return () => {
+      document.title = "Skill Path AI";
+    };
+  }, []);
+
+  return (
+    <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">
+      <header className="mb-12">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Skill Blog
+          </span>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-4">
+          Top Skills to Learn in 2026
+        </h1>
+        <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-2xl">
+          In-depth, professionally written learning guides for the most in-demand tech skills of 2026 — covering career relevance, core concepts, tools, certifications, and month-by-month roadmaps to job-readiness.
+        </p>
+        <div className="flex items-center gap-2 mt-5 text-sm text-muted-foreground">
+          <BookOpen className="w-4 h-4" />
+          <span>{blogPosts.length} guides · Updated May 2026</span>
+        </div>
+      </header>
+
+      <div className="flex flex-col gap-6">
+        {blogPosts.map((post, i) => (
+          <motion.article
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: i * 0.07 }}
+            className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group border-l-4 ${post.accentBorder}`}
+          >
+            <Link href={`/blog/${post.slug}`} className="block p-6 md:p-8">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${post.tagColor}`}>
+                  <Tag className="w-3 h-3" />
+                  {post.tag}
+                </span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  {post.readTime}
+                </span>
+                <span className="text-xs text-muted-foreground">· {post.date}</span>
+              </div>
+
+              <h2 className="text-xl md:text-2xl font-extrabold text-foreground leading-snug mb-3 group-hover:text-primary transition-colors">
+                <span className="mr-2">{post.emoji}</span>
+                {post.title}
+              </h2>
+
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3 mb-4">
+                {post.intro}
+              </p>
+
+              <div className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} group-hover:gap-2.5 transition-all`}>
+                Read full guide <ArrowRight className="w-4 h-4" />
+              </div>
+            </Link>
+          </motion.article>
+        ))}
+      </div>
+
+      <div className="mt-12 p-6 rounded-2xl bg-primary/5 border border-primary/20 text-center">
+        <p className="text-sm font-semibold text-foreground mb-1">Ready to start learning?</p>
+        <p className="text-sm text-muted-foreground mb-4">Generate a personalized day-by-day roadmap for any skill — powered by AI.</p>
+        <Link href="/">
+          <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+            Generate My Roadmap <ArrowRight className="w-4 h-4" />
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
 }
