@@ -1,31 +1,6 @@
-kind = "web"
-previewPath = "/"
-title = "Skill Path AI"
-version = "1.0.0"
-id = "artifacts/roadmap-app"
-router = "path"
-
-[[integratedSkills]]
-name = "react-vite"
-version = "1.0.0"
-
-[[services]]
-name = "web"
-paths = [ "/" ]
-localPort = 21505
-
-[services.development]
-run = "pnpm --filter @workspace/roadmap-app run dev"
-
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/roadmap-app", "run", "build" ]
-publicDir = "artifacts/roadmap-app/dist/public"
-serve = "static"
-
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
-
-[services.env]
-PORT = "21505"
-BASE_PATH = "/"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#2563EB"/>
+  <path d="M24 10L28 20H38L30 26L33 36L24 30L15 36L18 26L10 20H20L24 10Z" fill="white" opacity="0.95"/>
+  <circle cx="24" cy="24" r="4" fill="#2563EB"/>
+  <circle cx="24" cy="24" r="2" fill="white"/>
+</svg>

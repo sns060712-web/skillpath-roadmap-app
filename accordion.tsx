@@ -1,450 +1,128 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Font,
-} from "@react-pdf/renderer";
-import type { RoadmapResult } from "@workspace/api-client-react/src/generated/api.schemas";
+import React, { useState } from "react";
+import { Link } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clock, Tag, ChevronDown, ChevronUp, BookOpen, TrendingUp, ArrowRight } from "lucide-react";
+import { blogPosts } from "@/lib/blog-data";
 
-Font.registerHyphenationCallback((word) => [word]);
-
-const BRAND_BLUE = "#3b82f6";
-const DARK = "#0f172a";
-const MUTED = "#64748b";
-const LIGHT_BG = "#f8fafc";
-const BORDER = "#e2e8f0";
-const TAG_BG = "#eff6ff";
-const TAG_TEXT = "#1d4ed8";
-const COMPLETE_BG = "#f0fdf4";
-const COMPLETE_BORDER = "#bbf7d0";
-const COMPLETE_TEXT = "#15803d";
-
-const styles = StyleSheet.create({
-  page: {
-    fontFamily: "Helvetica",
-    backgroundColor: "#ffffff",
-    paddingTop: 0,
-    paddingBottom: 40,
-    paddingHorizontal: 0,
-  },
-
-  // ── Header ──────────────────────────────────────────────────────────────────
-  header: {
-    backgroundColor: BRAND_BLUE,
-    paddingHorizontal: 40,
-    paddingTop: 28,
-    paddingBottom: 28,
-    marginBottom: 0,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  brandName: {
-    fontSize: 20,
-    fontFamily: "Helvetica-Bold",
-    color: "#ffffff",
-    letterSpacing: 0.5,
-  },
-  headerMeta: {
-    alignItems: "flex-end",
-  },
-  headerMetaText: {
-    fontSize: 8,
-    color: "rgba(255,255,255,0.75)",
-    letterSpacing: 0.3,
-  },
-  headerMetaUrl: {
-    fontSize: 8,
-    color: "rgba(255,255,255,0.55)",
-    marginTop: 2,
-  },
-
-  // ── Hero band ───────────────────────────────────────────────────────────────
-  heroBand: {
-    backgroundColor: LIGHT_BG,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-    paddingHorizontal: 40,
-    paddingVertical: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  heroLeft: {
-    flex: 1,
-    paddingRight: 16,
-  },
-  skillName: {
-    fontSize: 24,
-    fontFamily: "Helvetica-Bold",
-    color: DARK,
-    marginBottom: 4,
-  },
-  levelTag: {
-    backgroundColor: TAG_BG,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    alignSelf: "flex-start",
-    marginBottom: 10,
-  },
-  levelTagText: {
-    fontSize: 8,
-    fontFamily: "Helvetica-Bold",
-    color: TAG_TEXT,
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-  overviewText: {
-    fontSize: 9.5,
-    color: MUTED,
-    lineHeight: 1.6,
-  },
-  heroRight: {
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 8,
-    padding: 14,
-    alignItems: "center",
-    minWidth: 110,
-  },
-  heroRightLabel: {
-    fontSize: 7,
-    color: MUTED,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-    marginBottom: 4,
-  },
-  heroRightValue: {
-    fontSize: 14,
-    fontFamily: "Helvetica-Bold",
-    color: DARK,
-  },
-  heroRightSub: {
-    fontSize: 7.5,
-    color: MUTED,
-    marginTop: 2,
-  },
-
-  // ── Body ────────────────────────────────────────────────────────────────────
-  body: {
-    paddingHorizontal: 40,
-    paddingTop: 24,
-  },
-
-  // ── Week separator ───────────────────────────────────────────────────────────
-  weekHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 18,
-    marginBottom: 10,
-  },
-  weekLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: BORDER,
-  },
-  weekLabel: {
-    fontSize: 8,
-    fontFamily: "Helvetica-Bold",
-    color: MUTED,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginHorizontal: 10,
-  },
-
-  // ── Day card ────────────────────────────────────────────────────────────────
-  dayCard: {
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 8,
-    marginBottom: 10,
-    overflow: "hidden",
-  },
-  dayCardCompleted: {
-    borderColor: COMPLETE_BORDER,
-    backgroundColor: COMPLETE_BG,
-  },
-  dayHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    backgroundColor: LIGHT_BG,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  dayHeaderCompleted: {
-    backgroundColor: COMPLETE_BG,
-    borderBottomColor: COMPLETE_BORDER,
-  },
-  dayNumber: {
-    fontSize: 9,
-    fontFamily: "Helvetica-Bold",
-    color: BRAND_BLUE,
-    marginRight: 6,
-    minWidth: 36,
-  },
-  dayTitle: {
-    fontSize: 10,
-    fontFamily: "Helvetica-Bold",
-    color: DARK,
-    flex: 1,
-  },
-  completedBadge: {
-    backgroundColor: COMPLETE_TEXT,
-    borderRadius: 3,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-  },
-  completedBadgeText: {
-    fontSize: 6,
-    fontFamily: "Helvetica-Bold",
-    color: "#ffffff",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  dayBody: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-
-  // ── Task ────────────────────────────────────────────────────────────────────
-  taskRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 5,
-  },
-  taskBullet: {
-    width: 14,
-    marginTop: 1.5,
-    alignItems: "center",
-  },
-  taskBulletCircle: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    borderWidth: 1.5,
-    borderColor: BRAND_BLUE,
-    backgroundColor: "#ffffff",
-  },
-  taskBulletChecked: {
-    backgroundColor: BRAND_BLUE,
-  },
-  taskText: {
-    fontSize: 9,
-    color: DARK,
-    flex: 1,
-    lineHeight: 1.5,
-  },
-  taskTextChecked: {
-    color: MUTED,
-  },
-
-  // ── Resources ───────────────────────────────────────────────────────────────
-  resourcesSection: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: BORDER,
-  },
-  resourcesLabel: {
-    fontSize: 7.5,
-    fontFamily: "Helvetica-Bold",
-    color: MUTED,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-    marginBottom: 5,
-  },
-  resourcesWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 4,
-  },
-  resourceChip: {
-    backgroundColor: TAG_BG,
-    borderRadius: 3,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginRight: 4,
-    marginBottom: 4,
-  },
-  resourceChipText: {
-    fontSize: 7.5,
-    color: TAG_TEXT,
-  },
-
-  // ── Footer ───────────────────────────────────────────────────────────────────
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 36,
-    borderTopWidth: 1,
-    borderTopColor: BORDER,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 40,
-    backgroundColor: "#ffffff",
-  },
-  footerLeft: {
-    fontSize: 7.5,
-    color: MUTED,
-  },
-  footerRight: {
-    fontSize: 7.5,
-    color: BRAND_BLUE,
-  },
-});
-
-interface RoadmapPDFProps {
-  roadmap: RoadmapResult;
-  checkedTasks?: string[];
-}
-
-function TaskBullet({ checked }: { checked: boolean }) {
-  return (
-    <View style={styles.taskBullet}>
-      <View style={[styles.taskBulletCircle, checked ? styles.taskBulletChecked : {}]} />
-    </View>
-  );
-}
-
-function DayCardPDF({
-  day,
-  checkedTasks,
-}: {
-  day: RoadmapResult["days"][number];
-  checkedTasks: string[];
-}) {
-  const allChecked = day.tasks.every((_, i) =>
-    checkedTasks.includes(`day-${day.day}-task-${i}`)
-  );
+function BlogCard({ post, index }: { post: typeof blogPosts[0]; index: number }) {
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <View style={[styles.dayCard, allChecked ? styles.dayCardCompleted : {}]} wrap={false}>
-      <View style={[styles.dayHeader, allChecked ? styles.dayHeaderCompleted : {}]}>
-        <Text style={styles.dayNumber}>Day {day.day}</Text>
-        <Text style={styles.dayTitle}>{day.title}</Text>
-        {allChecked && (
-          <View style={styles.completedBadge}>
-            <Text style={styles.completedBadgeText}>Completed</Text>
-          </View>
-        )}
-      </View>
-      <View style={styles.dayBody}>
-        {day.tasks.map((task, i) => {
-          const taskId = `day-${day.day}-task-${i}`;
-          const checked = checkedTasks.includes(taskId);
-          return (
-            <View key={taskId} style={styles.taskRow}>
-              <TaskBullet checked={checked} />
-              <Text style={[styles.taskText, checked ? styles.taskTextChecked : {}]}>
-                {task}
-              </Text>
-            </View>
-          );
-        })}
-
-        {day.resources && day.resources.length > 0 && (
-          <View style={styles.resourcesSection}>
-            <Text style={styles.resourcesLabel}>Recommended Resources</Text>
-            <View style={styles.resourcesWrap}>
-              {day.resources.map((r, i) => (
-                <View key={i} style={styles.resourceChip}>
-                  <Text style={styles.resourceChipText}>{r}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-      </View>
-    </View>
-  );
-}
-
-export function RoadmapPDF({ roadmap, checkedTasks = [] }: RoadmapPDFProps) {
-  const today = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-  const weeks: RoadmapResult["days"][] = [];
-  for (let i = 0; i < roadmap.days.length; i += 7) {
-    weeks.push(roadmap.days.slice(i, i + 7));
-  }
-
-  return (
-    <Document
-      title={`${roadmap.skillName} Learning Roadmap — Pathfinder`}
-      author="Pathfinder"
-      subject={`${roadmap.experienceLevel} ${roadmap.skillName} roadmap — ${roadmap.duration}`}
-      creator="Pathfinder"
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.07 }}
+      className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border-l-4 ${post.accentBorder}`}
+      aria-label={post.title}
     >
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <Text style={styles.brandName}>Pathfinder</Text>
-            <View style={styles.headerMeta}>
-              <Text style={styles.headerMetaText}>AI Skill Roadmap Generator</Text>
-              <Text style={styles.headerMetaUrl}>Generated on {today}</Text>
-            </View>
-          </View>
-        </View>
+      <div className="px-6 pt-6 pb-4">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${post.tagColor}`}>
+            <Tag className="w-3 h-3" />
+            {post.tag}
+          </span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="w-3 h-3" />
+            {post.readTime}
+          </span>
+          <span className="text-xs text-muted-foreground">· {post.date}</span>
+        </div>
 
-        {/* Hero band */}
-        <View style={styles.heroBand}>
-          <View style={styles.heroLeft}>
-            <Text style={styles.skillName}>{roadmap.skillName}</Text>
-            <View style={styles.levelTag}>
-              <Text style={styles.levelTagText}>{roadmap.experienceLevel}</Text>
-            </View>
-            <Text style={styles.overviewText}>{roadmap.overview}</Text>
-          </View>
-          <View style={styles.heroRight}>
-            <Text style={styles.heroRightLabel}>Duration</Text>
-            <Text style={styles.heroRightValue}>{roadmap.duration}</Text>
-            <Text style={styles.heroRightSub}>{roadmap.totalDays} days total</Text>
-          </View>
-        </View>
+        <h2 className="text-xl md:text-2xl font-extrabold text-foreground leading-snug mb-3">
+          <span className="mr-2">{post.emoji}</span>
+          {post.title}
+        </h2>
 
-        {/* Day cards grouped by week */}
-        <View style={styles.body}>
-          {weeks.map((weekDays, wi) => (
-            <View key={wi}>
-              <View style={styles.weekHeader}>
-                <View style={styles.weekLine} />
-                <Text style={styles.weekLabel}>
-                  {roadmap.totalDays <= 7
-                    ? "Your Roadmap"
-                    : `Week ${wi + 1}`}
-                </Text>
-                <View style={styles.weekLine} />
-              </View>
-              {weekDays.map((day) => (
-                <DayCardPDF key={day.day} day={day} checkedTasks={checkedTasks} />
+        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+          {post.intro}
+        </p>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key="body"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 pb-2 space-y-6 border-t border-border/60 pt-5">
+              {post.sections.map((section, i) => (
+                <div key={i}>
+                  <h3 className={`text-base font-bold mb-2 ${post.accentText}`}>
+                    {section.heading}
+                  </h3>
+                  <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
+                    {section.body}
+                  </p>
+                </div>
               ))}
-            </View>
-          ))}
-        </View>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Footer */}
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerLeft}>
-            Pathfinder · {roadmap.skillName} · {roadmap.experienceLevel}
-          </Text>
-          <Text style={styles.footerRight}>pathfinder.replit.app</Text>
-        </View>
-      </Page>
-    </Document>
+      <div className="px-6 pb-5 flex items-center gap-4 mt-1">
+        <button
+          onClick={() => setExpanded((e) => !e)}
+          className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} hover:underline underline-offset-2 transition-colors focus:outline-none`}
+          aria-expanded={expanded}
+        >
+          {expanded ? (
+            <><ChevronUp className="w-4 h-4" /> Show less</>
+          ) : (
+            <><ChevronDown className="w-4 h-4" /> Read preview</>
+          )}
+        </button>
+
+        <Link
+          href={`/blog/${post.slug}`}
+          className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} hover:underline underline-offset-2 transition-colors ml-auto`}
+        >
+          Full article <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </motion.article>
+  );
+}
+
+export function ExploreSkills() {
+  return (
+    <section
+      className="w-full max-w-3xl mx-auto mt-20 mb-10"
+      aria-label="Skill Blog — Trending Skills with Curated Learning Paths"
+    >
+      <header className="mb-10">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Skill Blog
+          </span>
+        </div>
+        <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
+          Top Skills to Learn in 2026
+        </h2>
+        <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl">
+          In-depth, professionally written learning guides for the most in-demand tech skills of 2026 — covering career relevance, core concepts, tools, certifications, and a month-by-month roadmap to job-readiness.
+        </p>
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>{blogPosts.length} guides · Updated May 2026</span>
+          </div>
+          <Link href="/blog" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline underline-offset-2">
+            View all <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </header>
+
+      <div className="flex flex-col gap-6">
+        {blogPosts.map((post, i) => (
+          <BlogCard key={post.id} post={post} index={i} />
+        ))}
+      </div>
+    </section>
   );
 }

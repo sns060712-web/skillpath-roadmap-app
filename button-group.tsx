@@ -1,59 +1,125 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { useState } from "react";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
+const LABELS = ["Poor", "Fair", "Good", "Great", "Excellent"];
 
-const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
-  {
-    variants: {
-      variant: {
-        default: "bg-background text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+interface StarRatingProps {
+  value: number | null;
+  onChange?: (rating: number) => void;
+  readOnly?: boolean;
+  size?: "sm" | "md" | "lg";
+  showLabel?: boolean;
+  className?: string;
+}
 
-const Alert = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
->(({ className, variant, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="alert"
-    className={cn(alertVariants({ variant }), className)}
-    {...props}
-  />
-))
-Alert.displayName = "Alert"
+export function StarRating({
+  value,
+  onChange,
+  readOnly = false,
+  size = "md",
+  showLabel = true,
+  className,
+}: StarRatingProps) {
+  const [hovered, setHovered] = useState<number | null>(null);
 
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-AlertTitle.displayName = "AlertTitle"
+  const starSizes = { sm: "w-4 h-4", md: "w-6 h-6", lg: "w-8 h-8" };
+  const gapSizes = { sm: "gap-0.5", md: "gap-1", lg: "gap-1.5" };
+  const starSize = starSizes[size];
+  const gapSize = gapSizes[size];
 
-const AlertDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props}
-  />
-))
-AlertDescription.displayName = "AlertDescription"
+  const active = hovered ?? value ?? 0;
 
-export { Alert, AlertTitle, AlertDescription }
+  return (
+    <div className={cn("flex flex-col items-start gap-1", className)}>
+      <div
+        className={cn("flex", gapSize)}
+        onMouseLeave={() => !readOnly && setHovered(null)}
+        role={readOnly ? "img" : "radiogroup"}
+        aria-label={`Rating: ${value ?? 0} out of 5`}
+      >
+        {[1, 2, 3, 4, 5].map((star) => {
+          const filled = star <= active;
+          return (
+            <button
+              key={star}
+              type="button"
+              disabled={readOnly}
+              onMouseEnter={() => !readOnly && setHovered(star)}
+              onClick={() => !readOnly && onChange?.(star)}
+              aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
+              className={cn(
+                "transition-all duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
+                readOnly ? "cursor-default" : "cursor-pointer hover:scale-110"
+              )}
+            >
+              <Star
+                className={cn(
+                  starSize,
+                  "transition-colors duration-100",
+                  filled
+                    ? "fill-amber-400 text-amber-400"
+                    : "fill-transparent text-muted-foreground/40"
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      {showLabel && !readOnly && (
+        <span className="text-xs text-muted-foreground h-4">
+          {hovered
+            ? LABELS[hovered - 1]
+            : value
+            ? `You rated: ${LABELS[value - 1]}`
+            : "Tap to rate this roadmap"}
+        </span>
+      )}
+    </div>
+  );
+}
+
+interface RatingWidgetProps {
+  roadmapId: number;
+  initialRating: number | null;
+  onRate: (rating: number) => void;
+  isPending?: boolean;
+}
+
+export function RatingWidget({
+  roadmapId: _roadmapId,
+  initialRating,
+  onRate,
+  isPending = false,
+}: RatingWidgetProps) {
+  const [submitted, setSubmitted] = useState(false);
+  const hasRated = initialRating !== null || submitted;
+
+  const handleRate = (rating: number) => {
+    if (isPending) return;
+    onRate(rating);
+    setSubmitted(true);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 p-4 bg-muted/30 border border-border/60 rounded-xl">
+      <div className="flex items-center gap-2">
+        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+        <span className="text-sm font-semibold">
+          {hasRated ? "Thanks for your rating!" : "Was this roadmap helpful?"}
+        </span>
+        {isPending && (
+          <span className="text-xs text-muted-foreground animate-pulse ml-auto">Saving...</span>
+        )}
+      </div>
+      <StarRating
+        value={initialRating}
+        onChange={handleRate}
+        readOnly={hasRated && !isPending}
+        size="md"
+        showLabel={!hasRated}
+      />
+    </div>
+  );
+}

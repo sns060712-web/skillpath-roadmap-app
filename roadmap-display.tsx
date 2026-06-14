@@ -1,128 +1,113 @@
-import React, { useState } from "react";
-import { Link } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Tag, ChevronDown, ChevronUp, BookOpen, TrendingUp, ArrowRight } from "lucide-react";
-import { blogPosts } from "@/lib/blog-data";
+import { Link, useLocation } from "wouter";
+import { Moon, Sun, Map, List, BarChart3, LogIn, LogOut, UserCircle2, BookOpen, TrendingUp } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
+import { Show, useUser, useClerk } from "@clerk/react";
 
-function BlogCard({ post, index }: { post: typeof blogPosts[0]; index: number }) {
-  const [expanded, setExpanded] = useState(false);
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+export function Navbar() {
+  const { theme, setTheme } = useTheme();
+  const [location] = useLocation();
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.07 }}
-      className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border-l-4 ${post.accentBorder}`}
-      aria-label={post.title}
-    >
-      <div className="px-6 pt-6 pb-4">
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${post.tagColor}`}>
-            <Tag className="w-3 h-3" />
-            {post.tag}
-          </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" />
-            {post.readTime}
-          </span>
-          <span className="text-xs text-muted-foreground">· {post.date}</span>
-        </div>
-
-        <h2 className="text-xl md:text-2xl font-extrabold text-foreground leading-snug mb-3">
-          <span className="mr-2">{post.emoji}</span>
-          {post.title}
-        </h2>
-
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-          {post.intro}
-        </p>
-      </div>
-
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            key="body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="px-6 pb-2 space-y-6 border-t border-border/60 pt-5">
-              {post.sections.map((section, i) => (
-                <div key={i}>
-                  <h3 className={`text-base font-bold mb-2 ${post.accentText}`}>
-                    {section.heading}
-                  </h3>
-                  <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
-                    {section.body}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="px-6 pb-5 flex items-center gap-4 mt-1">
-        <button
-          onClick={() => setExpanded((e) => !e)}
-          className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} hover:underline underline-offset-2 transition-colors focus:outline-none`}
-          aria-expanded={expanded}
-        >
-          {expanded ? (
-            <><ChevronUp className="w-4 h-4" /> Show less</>
-          ) : (
-            <><ChevronDown className="w-4 h-4" /> Read preview</>
-          )}
-        </button>
-
-        <Link
-          href={`/blog/${post.slug}`}
-          className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} hover:underline underline-offset-2 transition-colors ml-auto`}
-        >
-          Full article <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
-    </motion.article>
-  );
-}
-
-export function ExploreSkills() {
-  return (
-    <section
-      className="w-full max-w-3xl mx-auto mt-20 mb-10"
-      aria-label="Skill Blog — Trending Skills with Curated Learning Paths"
-    >
-      <header className="mb-10">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full">
-            <TrendingUp className="w-3.5 h-3.5" />
-            Skill Blog
-          </span>
-        </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
-          Top Skills to Learn in 2026
-        </h2>
-        <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl">
-          In-depth, professionally written learning guides for the most in-demand tech skills of 2026 — covering career relevance, core concepts, tools, certifications, and a month-by-month roadmap to job-readiness.
-        </p>
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>{blogPosts.length} guides · Updated May 2026</span>
-          </div>
-          <Link href="/blog" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline underline-offset-2">
-            View all <ArrowRight className="w-3.5 h-3.5" />
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight text-primary">
+            <Map className="w-6 h-6" />
+            <span>Pathfinder</span>
           </Link>
-        </div>
-      </header>
 
-      <div className="flex flex-col gap-6">
-        {blogPosts.map((post, i) => (
-          <BlogCard key={post.id} post={post} index={i} />
-        ))}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <Link href="/" className={`transition-colors hover:text-primary ${location === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
+              Generator
+            </Link>
+            <Link href="/saved" className={`transition-colors hover:text-primary ${location === '/saved' ? 'text-primary' : 'text-muted-foreground'}`}>
+              Saved Roadmaps
+            </Link>
+            <Link href="/stats" className={`transition-colors hover:text-primary ${location === '/stats' ? 'text-primary' : 'text-muted-foreground'}`}>
+              Stats
+            </Link>
+            <Link href="/blog" className={`transition-colors hover:text-primary ${location.startsWith('/blog') ? 'text-primary' : 'text-muted-foreground'}`}>
+              Blog
+            </Link>
+            <Link href="/trending" className={`transition-colors hover:text-primary ${location.startsWith('/trending') ? 'text-primary' : 'text-muted-foreground'}`}>
+              Trending
+            </Link>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            aria-label="Toggle theme"
+          >
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          </Button>
+
+          <Show when="signed-out">
+            <div className="hidden md:flex items-center gap-2">
+              <Link href="/sign-in">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/sign-up">
+                <Button size="sm" className="gap-1.5">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          </Show>
+
+          <Show when="signed-in">
+            <div className="hidden md:flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/50">
+                {user?.imageUrl ? (
+                  <img src={user.imageUrl} alt={user.firstName ?? "User"} className="w-6 h-6 rounded-full object-cover" />
+                ) : (
+                  <UserCircle2 className="w-5 h-5 text-muted-foreground" />
+                )}
+                <span className="text-sm font-medium text-foreground max-w-[120px] truncate">
+                  {user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ?? "User"}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
+                onClick={() => signOut({ redirectUrl: basePath || "/" })}
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            </div>
+          </Show>
+
+          <div className="flex md:hidden items-center gap-1">
+            <Link href="/"><Button variant="ghost" size="icon" className={location === '/' ? 'text-primary' : 'text-muted-foreground'}><Map className="h-5 w-5" /></Button></Link>
+            <Link href="/saved"><Button variant="ghost" size="icon" className={location === '/saved' ? 'text-primary' : 'text-muted-foreground'}><List className="h-5 w-5" /></Button></Link>
+            <Link href="/stats"><Button variant="ghost" size="icon" className={location === '/stats' ? 'text-primary' : 'text-muted-foreground'}><BarChart3 className="h-5 w-5" /></Button></Link>
+            <Link href="/blog"><Button variant="ghost" size="icon" className={location.startsWith('/blog') ? 'text-primary' : 'text-muted-foreground'}><BookOpen className="h-5 w-5" /></Button></Link>
+            <Link href="/trending"><Button variant="ghost" size="icon" className={location.startsWith('/trending') ? 'text-primary' : 'text-muted-foreground'}><TrendingUp className="h-5 w-5" /></Button></Link>
+            <Show when="signed-out">
+              <Link href="/sign-in"><Button variant="ghost" size="icon" className="text-muted-foreground"><LogIn className="h-5 w-5" /></Button></Link>
+            </Show>
+            <Show when="signed-in">
+              <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => signOut({ redirectUrl: basePath || "/" })}>
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </Show>
+          </div>
+        </div>
       </div>
-    </section>
+    </header>
   );
 }
