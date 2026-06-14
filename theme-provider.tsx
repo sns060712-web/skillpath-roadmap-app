@@ -1,113 +1,140 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, ChevronRight, Trash2, BookOpen, Calendar } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Progress } from "@/components/ui/progress";
+import { DayCard } from "./day-card";
+import { AdPlaceholder } from "./ad-placeholder";
+import { PdfDownloadButton } from "./pdf-download-button";
 import { Button } from "@/components/ui/button";
-import type { RecentRoadmap } from "@/hooks/use-recent-roadmaps";
+import { Printer } from "lucide-react";
 import type { RoadmapResult } from "@workspace/api-client-react/src/generated/api.schemas";
+import { motion } from "framer-motion";
 
-const LEVEL_COLORS: Record<string, string> = {
-  Beginner: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
-  Intermediate: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
-  Advanced: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400",
-};
-
-function timeAgo(ts: number): string {
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+interface RoadmapDisplayProps {
+  roadmap: RoadmapResult;
+  initialCheckedTasks?: string[];
+  onProgressUpdate?: (checkedTasks: string[]) => void;
+  isReadOnly?: boolean;
 }
 
-interface RecentRoadmapsProps {
-  recent: RecentRoadmap[];
-  onSelect: (roadmap: RoadmapResult) => void;
-  onClear: () => void;
-}
+export function RoadmapDisplay({ roadmap, initialCheckedTasks = [], onProgressUpdate, isReadOnly = false }: RoadmapDisplayProps) {
+  const [checkedTasks, setCheckedTasks] = useState<string[]>(initialCheckedTasks);
 
-export function RecentRoadmaps({ recent, onSelect, onClear }: RecentRoadmapsProps) {
-  if (recent.length === 0) return null;
+  const totalTasks = useMemo(() => {
+    return roadmap.days.reduce((acc, day) => acc + day.tasks.length, 0);
+  }, [roadmap]);
+
+  const progress = totalTasks === 0 ? 0 : Math.round((checkedTasks.length / totalTasks) * 100);
+
+  const handleToggleTask = (taskId: string, checked: boolean) => {
+    const next = checked
+      ? [...checkedTasks, taskId]
+      : checkedTasks.filter((id) => id !== taskId);
+    setCheckedTasks(next);
+    if (onProgressUpdate) {
+      onProgressUpdate(next);
+    }
+  };
+
+  const daysWithAds = useMemo(() => {
+    const elements: React.ReactNode[] = [];
+    const ads = [
+      { type: "course" as const, title: "Master React & TypeScript", description: "Deep dive into building scalable frontend applications with modern tooling.", badge: "Recommended Course" },
+      { type: "adsense" as const, title: "", description: "", badge: "" },
+      { type: "book" as const, title: "Clean Architecture for JS", description: "Learn how to structure your JS applications for long-term maintainability.", badge: "Recommended Book" }
+    ];
+
+    let adIndex = 0;
+
+    roadmap.days.forEach((day, index) => {
+      elements.push(
+        <DayCard
+          key={`day-${day.day}`}
+          day={day}
+          checkedTasks={checkedTasks}
+          onToggleTask={handleToggleTask}
+          index={index}
+          isReadOnly={isReadOnly}
+        />
+      );
+
+      // Insert ad every ~7 days (weekly)
+      if ((index + 1) % 7 === 0 && adIndex < ads.length) {
+        const ad = ads[adIndex];
+        elements.push(
+          <AdPlaceholder
+            key={`ad-${index}`}
+            type={ad.type}
+            title={ad.title}
+            description={ad.description}
+            badge={ad.badge}
+          />
+        );
+        adIndex++;
+      }
+    });
+
+    return elements;
+  }, [roadmap, checkedTasks]);
 
   return (
-    <AnimatePresence>
-      <motion.section
-        key="recent"
-        initial={{ opacity: 0, y: 16 }}
+    <div className="w-full max-w-4xl mx-auto space-y-8">
+      {/* Header & Progress */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="w-full max-w-3xl mx-auto mb-10"
+        className="bg-card border rounded-2xl p-6 md:p-8 shadow-sm"
       >
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-3 px-1">
-          <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            <Clock className="w-4 h-4" />
-            Recently Generated
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
+              <h2 className="text-3xl font-bold tracking-tight">{roadmap.skillName}</h2>
+              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide">
+                {roadmap.experienceLevel}
+              </span>
+            </div>
+            <p className="text-muted-foreground max-w-2xl mb-4">{roadmap.overview}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <PdfDownloadButton
+                roadmap={roadmap}
+                checkedTasks={checkedTasks}
+                size="sm"
+                variant="outline"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.print()}
+                data-testid="button-print-roadmap"
+              >
+                <Printer className="w-4 h-4" />
+                Print Roadmap
+              </Button>
+            </div>
           </div>
-          <button
-            onClick={onClear}
-            className="flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-            title="Clear history"
-          >
-            <Trash2 className="w-3 h-3" />
-            Clear
-          </button>
+          <div className="flex flex-col items-end shrink-0 bg-muted/50 p-4 rounded-xl border border-border/50">
+            <span className="text-sm font-medium text-muted-foreground mb-1 uppercase tracking-wider">Duration</span>
+            <span className="text-xl font-bold">{roadmap.duration}</span>
+            <span className="text-xs text-muted-foreground mt-1">{roadmap.totalDays} Days Total</span>
+          </div>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {recent.map((item, i) => (
-            <motion.button
-              key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              onClick={() => onSelect(item.roadmap)}
-              className="group relative flex flex-col text-left bg-card border border-border rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 overflow-hidden"
-            >
-              {/* Subtle gradient accent */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        {!isReadOnly && (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-sm font-medium">
+              <span>Overall Progress</span>
+              <span className="text-primary font-bold">{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-3" />
+            <p className="text-xs text-muted-foreground text-right">
+              {checkedTasks.length} of {totalTasks} tasks completed
+            </p>
+          </div>
+        )}
+      </motion.div>
 
-              {/* Skill name + arrow */}
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="shrink-0 p-1.5 bg-primary/10 rounded-lg">
-                    <BookOpen className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <span className="font-bold text-sm leading-tight truncate">
-                    {item.skillName}
-                  </span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 mt-0.5 transition-colors" />
-              </div>
-
-              {/* Overview */}
-              <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">
-                {item.overview}
-              </p>
-
-              {/* Meta row */}
-              <div className="flex items-center gap-2 mt-auto flex-wrap">
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                    LEVEL_COLORS[item.experienceLevel] ?? "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {item.experienceLevel}
-                </span>
-                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <Calendar className="w-3 h-3" />
-                  {item.duration}
-                </span>
-                <span className="ml-auto text-[10px] text-muted-foreground/50">
-                  {timeAgo(item.viewedAt)}
-                </span>
-              </div>
-            </motion.button>
-          ))}
-        </div>
-      </motion.section>
-    </AnimatePresence>
+      {/* Days List */}
+      <div className="space-y-6">
+        {daysWithAds}
+      </div>
+    </div>
   );
 }

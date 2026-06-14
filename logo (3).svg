@@ -1,51 +1,31 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1"
-    />
-    <title>AI Skill Roadmap Generator</title>
-    <meta
-      name="description"
-      content="AI Skill Roadmap Generator — built on Replit."
-    />
-    <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="AI Skill Roadmap Generator" />
-    <meta property="og:type" content="website" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+kind = "web"
+previewPath = "/"
+title = "Skill Path AI"
+version = "1.0.0"
+id = "artifacts/roadmap-app"
+router = "path"
 
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-K0EH44L03Z"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
 
-      // Google ko direct 'granted' signal bhej rahe hain taaki consent verify ho jaye
-      gtag("consent", "default", {
-        ad_storage: "granted",
-        ad_user_data: "granted",
-        ad_personalization: "granted",
-        analytics_storage: "granted",
-      });
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21505
 
-      gtag("config", "G-K0EH44L03Z");
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+[services.development]
+run = "pnpm --filter @workspace/roadmap-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/roadmap-app", "run", "build" ]
+publicDir = "artifacts/roadmap-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21505"
+BASE_PATH = "/"

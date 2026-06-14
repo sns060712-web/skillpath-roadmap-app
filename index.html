@@ -1,168 +1,108 @@
 import React, { useEffect } from "react";
-import { Link, useParams } from "wouter";
+import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Clock, Tag, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { Clock, Tag, ArrowRight, TrendingUp, BookOpen } from "lucide-react";
 import { blogPosts } from "@/lib/blog-data";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-export default function BlogPost() {
-  const params = useParams<{ slug: string }>();
-  const post = blogPosts.find((p) => p.slug === params.slug);
-
-  const currentIndex = post ? blogPosts.indexOf(post) : -1;
-  const prevPost = currentIndex > 0 ? blogPosts[currentIndex - 1] : null;
-  const nextPost = currentIndex < blogPosts.length - 1 ? blogPosts[currentIndex + 1] : null;
-
+export default function Blog() {
   useEffect(() => {
-    if (!post) {
-      document.title = "Article Not Found | Skill Path AI";
-      return;
+    document.title = "Skill Blog — Top Tech Skills to Learn in 2026 | Skill Path AI";
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
     }
+    meta.setAttribute(
+      "content",
+      "Professionally written learning guides for the most in-demand tech skills of 2026 — Python, Cyber Security, UI/UX Design, Full-Stack Development, and Data Science.",
+    );
 
-    document.title = post.metaTitle;
+    const ogTitle = document.querySelector('meta[property="og:title"]') || (() => { const m = document.createElement("meta"); m.setAttribute("property", "og:title"); document.head.appendChild(m); return m; })();
+    ogTitle.setAttribute("content", "Skill Blog — Top Tech Skills to Learn in 2026 | Skill Path AI");
 
-    const setMeta = (selector: string, attr: string, value: string) => {
-      let el = document.querySelector(selector);
-      if (!el) {
-        el = document.createElement("meta");
-        const [key, val] = attr.split("=");
-        el.setAttribute(key, val ?? attr);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("content", value);
-    };
+    const ogDesc = document.querySelector('meta[property="og:description"]') || (() => { const m = document.createElement("meta"); m.setAttribute("property", "og:description"); document.head.appendChild(m); return m; })();
+    ogDesc.setAttribute("content", "In-depth skill roadmaps covering Python, Cyber Security, UI/UX, Full-Stack Web Dev, and Data Science. Curated for 2026 learners.");
 
-    setMeta('meta[name="description"]', "name=description", post.metaDescription);
-    setMeta('meta[property="og:title"]', "property=og:title", post.metaTitle);
-    setMeta('meta[property="og:description"]', "property=og:description", post.metaDescription);
-    setMeta('meta[property="og:type"]', "property=og:type", "article");
-    setMeta('meta[name="twitter:card"]', "name=twitter:card", "summary_large_image");
-    setMeta('meta[name="twitter:title"]', "name=twitter:title", post.metaTitle);
-    setMeta('meta[name="twitter:description"]', "name=twitter:description", post.metaDescription);
-
-    const canonical = document.querySelector('link[rel="canonical"]') || (() => {
-      const l = document.createElement("link");
-      l.setAttribute("rel", "canonical");
-      document.head.appendChild(l);
-      return l;
-    })();
-    canonical.setAttribute("href", `${window.location.origin}${BASE}/blog/${post.slug}`);
+    const ogType = document.querySelector('meta[property="og:type"]') || (() => { const m = document.createElement("meta"); m.setAttribute("property", "og:type"); document.head.appendChild(m); return m; })();
+    ogType.setAttribute("content", "website");
 
     return () => {
       document.title = "Skill Path AI";
     };
-  }, [post]);
+  }, []);
 
-  if (!post) {
-    return (
-      <div className="container mx-auto px-4 py-24 text-center max-w-xl">
-        <p className="text-5xl mb-4">🔍</p>
-        <h1 className="text-2xl font-bold mb-2">Article not found</h1>
-        <p className="text-muted-foreground mb-6">That blog post doesn't exist or may have moved.</p>
-        <Link href="/blog">
-          <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity text-sm">
-            <ArrowLeft className="w-4 h-4" /> Back to Blog
+  return (
+    <div className="container mx-auto px-4 md:px-8 py-12 max-w-4xl">
+      <header className="mb-12">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Skill Blog
+          </span>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-4">
+          Top Skills to Learn in 2026
+        </h1>
+        <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-2xl">
+          In-depth, professionally written learning guides for the most in-demand tech skills of 2026 — covering career relevance, core concepts, tools, certifications, and month-by-month roadmaps to job-readiness.
+        </p>
+        <div className="flex items-center gap-2 mt-5 text-sm text-muted-foreground">
+          <BookOpen className="w-4 h-4" />
+          <span>{blogPosts.length} guides · Updated May 2026</span>
+        </div>
+      </header>
+
+      <div className="flex flex-col gap-6">
+        {blogPosts.map((post, i) => (
+          <motion.article
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: i * 0.07 }}
+            className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group border-l-4 ${post.accentBorder}`}
+          >
+            <Link href={`/blog/${post.slug}`} className="block p-6 md:p-8">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${post.tagColor}`}>
+                  <Tag className="w-3 h-3" />
+                  {post.tag}
+                </span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  {post.readTime}
+                </span>
+                <span className="text-xs text-muted-foreground">· {post.date}</span>
+              </div>
+
+              <h2 className="text-xl md:text-2xl font-extrabold text-foreground leading-snug mb-3 group-hover:text-primary transition-colors">
+                <span className="mr-2">{post.emoji}</span>
+                {post.title}
+              </h2>
+
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3 mb-4">
+                {post.intro}
+              </p>
+
+              <div className={`inline-flex items-center gap-1.5 text-sm font-semibold ${post.accentText} group-hover:gap-2.5 transition-all`}>
+                Read full guide <ArrowRight className="w-4 h-4" />
+              </div>
+            </Link>
+          </motion.article>
+        ))}
+      </div>
+
+      <div className="mt-12 p-6 rounded-2xl bg-primary/5 border border-primary/20 text-center">
+        <p className="text-sm font-semibold text-foreground mb-1">Ready to start learning?</p>
+        <p className="text-sm text-muted-foreground mb-4">Generate a personalized day-by-day roadmap for any skill — powered by AI.</p>
+        <Link href="/">
+          <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+            Generate My Roadmap <ArrowRight className="w-4 h-4" />
           </button>
         </Link>
       </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 md:px-8 py-10 max-w-3xl">
-      <nav className="mb-8">
-        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
-          <ArrowLeft className="w-4 h-4" /> Back to Skill Blog
-        </Link>
-      </nav>
-
-      <motion.article
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm border-l-4 ${post.accentBorder}`}
-        itemScope
-        itemType="https://schema.org/Article"
-      >
-        <header className="px-6 md:px-10 pt-8 pb-6 border-b border-border/60">
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${post.tagColor}`}>
-              <Tag className="w-3 h-3" />
-              {post.tag}
-            </span>
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              {post.readTime}
-            </span>
-            <span className="text-xs text-muted-foreground">· {post.date}</span>
-          </div>
-
-          <h1
-            className="text-2xl md:text-4xl font-extrabold text-foreground leading-tight mb-4"
-            itemProp="headline"
-          >
-            <span className="mr-2">{post.emoji}</span>
-            {post.title}
-          </h1>
-
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed" itemProp="description">
-            {post.intro}
-          </p>
-        </header>
-
-        <div className="px-6 md:px-10 py-8 space-y-8" itemProp="articleBody">
-          {post.sections.map((section, i) => (
-            <motion.section
-              key={i}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 + i * 0.06 }}
-            >
-              <h2 className={`text-lg md:text-xl font-bold mb-3 ${post.accentText}`}>
-                {section.heading}
-              </h2>
-              <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
-                {section.body}
-              </p>
-            </motion.section>
-          ))}
-        </div>
-
-        <div className="mx-6 md:mx-10 mb-8 p-5 rounded-xl bg-primary/5 border border-primary/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p className="font-semibold text-foreground text-sm">Ready to master {post.tag}?</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Generate a personalised AI roadmap in seconds.</p>
-          </div>
-          <Link href="/">
-            <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap shrink-0">
-              <Sparkles className="w-4 h-4" /> Generate Roadmap
-            </button>
-          </Link>
-        </div>
-      </motion.article>
-
-      {(prevPost || nextPost) && (
-        <nav className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="Blog navigation">
-          {prevPost ? (
-            <Link href={`/blog/${prevPost.slug}`} className="group flex flex-col gap-1 p-4 rounded-xl border border-border bg-card hover:shadow-md transition-all">
-              <span className="text-xs text-muted-foreground flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> Previous</span>
-              <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                {prevPost.emoji} {prevPost.title}
-              </span>
-            </Link>
-          ) : <div />}
-
-          {nextPost ? (
-            <Link href={`/blog/${nextPost.slug}`} className="group flex flex-col gap-1 p-4 rounded-xl border border-border bg-card hover:shadow-md transition-all text-right sm:ml-auto sm:w-full">
-              <span className="text-xs text-muted-foreground flex items-center gap-1 justify-end">Next <ArrowRight className="w-3 h-3" /></span>
-              <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                {nextPost.emoji} {nextPost.title}
-              </span>
-            </Link>
-          ) : <div />}
-        </nav>
-      )}
     </div>
   );
 }

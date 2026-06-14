@@ -1,143 +1,536 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useGetRoadmapStats } from "@workspace/api-client-react";
-import { Loader2, TrendingUp, Target, CheckCircle2, Zap, Star } from "lucide-react";
-import { StarRating } from "@/components/roadmap/star-rating";
+import { Link } from "wouter";
+import { TrendingUp, Code2, Shield, Globe, Database, Sparkles, ChevronRight, Clock, BarChart3 } from "lucide-react";
+import { AdSenseBanner } from "@/components/roadmap/adsense-banner";
 
-export default function Stats() {
-  const { data: stats, isLoading } = useGetRoadmapStats();
+const roadmaps = [
+  {
+    id: "python",
+    icon: Code2,
+    color: "text-yellow-500",
+    bg: "bg-yellow-500/10",
+    border: "border-yellow-500/20",
+    badge: "🐍 Programming",
+    title: "Python Programming: Beginner to Advanced",
+    subtitle: "The world's most popular language — master it in 3 months",
+    duration: "3 Months",
+    level: "Beginner → Advanced",
+    overview: `Python has consistently ranked as the world's most popular programming language for four consecutive years, and for good reason. Python's readable, English-like syntax allows absolute beginners to write meaningful programs within days, while its depth supports some of the most complex AI systems in the world. This roadmap takes you from your very first line of code to building real-world applications in data science, web development, and automation.`,
+    weeks: [
+      {
+        label: "Month 1 — Python Fundamentals",
+        milestones: [
+          {
+            title: "Week 1–2: Core Syntax & Data Types",
+            tasks: [
+              "Install Python 3.x and set up VS Code with the Python extension",
+              "Understand variables, data types: strings, integers, floats, booleans",
+              "Master Python's built-in data structures: Lists, Tuples, Sets, Dictionaries",
+              "Write conditional logic using if/elif/else statements",
+              "Control flow with for loops, while loops, break and continue",
+              "Practice 20+ mini-exercises from HackerRank Python track",
+            ],
+          },
+          {
+            title: "Week 3–4: Functions & Object-Oriented Programming",
+            tasks: [
+              "Define and call functions with positional and keyword arguments",
+              "Understand scope: local vs global variables, the LEGB rule",
+              "Write reusable modules and import them across files",
+              "Learn Classes, Inheritance, Encapsulation and Polymorphism",
+              "Build a Bank Account class with deposit/withdraw/balance methods",
+              "Practice file I/O: reading and writing .txt and .csv files",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 2 — Libraries & Real-World Projects",
+        milestones: [
+          {
+            title: "Week 5–6: The Data Science Stack",
+            tasks: [
+              "Install and master NumPy for fast vectorized numerical computation",
+              "Use Pandas to read, clean and transform CSV and Excel datasets",
+              "Create visualizations with Matplotlib and Seaborn",
+              "Perform exploratory data analysis (EDA) on a real Kaggle dataset",
+              "Understand statistical concepts: mean, median, variance, correlation",
+              "Build a complete data analysis report on a real-world dataset",
+            ],
+          },
+          {
+            title: "Week 7–8: Web Development with Flask",
+            tasks: [
+              "Understand the HTTP request/response cycle and REST principles",
+              "Build your first Flask web application with routes and templates",
+              "Use Jinja2 templates to render dynamic HTML pages",
+              "Connect Flask to a SQLite database using SQLAlchemy ORM",
+              "Implement user authentication with Flask-Login and password hashing",
+              "Deploy a Flask app to Render or Railway for free hosting",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 3 — Advanced Python & Machine Learning",
+        milestones: [
+          {
+            title: "Week 9–10: Advanced Python Concepts",
+            tasks: [
+              "Master list comprehensions, generator expressions and itertools",
+              "Understand decorators, context managers and metaclasses",
+              "Write async Python with asyncio for concurrent I/O operations",
+              "Test your code using pytest and write mock objects",
+              "Profile and optimize Python code using cProfile and line_profiler",
+              "Build a command-line tool with argparse and publish it to PyPI",
+            ],
+          },
+          {
+            title: "Week 11–12: Machine Learning with Scikit-Learn",
+            tasks: [
+              "Understand supervised vs unsupervised learning paradigms",
+              "Train a linear regression model to predict house prices",
+              "Classify data using decision trees, random forests and SVM",
+              "Evaluate models with cross-validation, precision, recall, and F1-score",
+              "Build an end-to-end ML pipeline with scikit-learn Pipelines",
+              "Explore deep learning basics with TensorFlow/Keras on MNIST",
+            ],
+          },
+        ],
+      },
+    ],
+    resources: ["Python.org Official Docs", "Automate the Boring Stuff (free book)", "CS50P — Harvard", "Kaggle Learn", "RealPython.com"],
+    cta: "Python",
+  },
+  {
+    id: "fullstack",
+    icon: Globe,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500/20",
+    badge: "🖥️ Web Development",
+    title: "Full-Stack Web Development: Frontend to Backend in 2026",
+    subtitle: "Build complete production-grade web applications from scratch",
+    duration: "3 Months",
+    level: "Beginner → Intermediate",
+    overview: `Full-stack development means you can build the entire product — the visual interface users interact with, the server logic that processes their actions, and the database that stores their data — independently. Full-stack developers are among the most in-demand and highest-compensated professionals in tech. This roadmap covers the complete modern web stack: HTML/CSS → JavaScript → React → Node.js/Express → PostgreSQL → Deployment.`,
+    weeks: [
+      {
+        label: "Month 1 — Frontend Mastery",
+        milestones: [
+          {
+            title: "Week 1–2: HTML5, CSS3 & Responsive Design",
+            tasks: [
+              "Master semantic HTML5: article, section, header, footer, nav, main",
+              "CSS Box Model, Flexbox layout, and CSS Grid for 2D layouts",
+              "Responsive design with media queries and mobile-first methodology",
+              "CSS custom properties (variables) and modern pseudo-selectors",
+              "Build a fully responsive portfolio landing page from scratch",
+              "Optimize images with WebP format and lazy loading attributes",
+            ],
+          },
+          {
+            title: "Week 3–4: JavaScript ES2024 Fundamentals",
+            tasks: [
+              "Variables: var vs let vs const, hoisting and temporal dead zone",
+              "Functions: arrow functions, closures, higher-order functions",
+              "Asynchronous JS: Promises, async/await, and the Event Loop",
+              "DOM manipulation: querySelector, addEventListener, createElement",
+              "Fetch API: making GET/POST requests to REST APIs",
+              "LocalStorage and SessionStorage for client-side data persistence",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 2 — React & Backend Development",
+        milestones: [
+          {
+            title: "Week 5–6: React 19 & Modern Frontend",
+            tasks: [
+              "Understand the Virtual DOM and React's reconciliation algorithm",
+              "Create function components with JSX and manage state with useState",
+              "Handle side effects with useEffect and optimize with useMemo/useCallback",
+              "Client-side routing with React Router v7",
+              "Global state management with Zustand or Redux Toolkit",
+              "Fetch server data with TanStack Query (React Query) for caching",
+            ],
+          },
+          {
+            title: "Week 7–8: Node.js & Express REST API",
+            tasks: [
+              "Understand Node.js architecture: single-threaded event loop, libuv",
+              "Build a REST API with Express 5 featuring full CRUD operations",
+              "Middleware: body-parser, CORS, helmet for security headers",
+              "JWT-based authentication: sign, verify, refresh tokens",
+              "Input validation with Zod and error handling middleware",
+              "File uploads with Multer and image processing with Sharp",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 3 — Databases, Testing & Deployment",
+        milestones: [
+          {
+            title: "Week 9–10: PostgreSQL & Database Design",
+            tasks: [
+              "Relational database design: entities, attributes, relationships",
+              "SQL fundamentals: SELECT, INSERT, UPDATE, DELETE, JOIN",
+              "Advanced SQL: window functions, CTEs, indexes and EXPLAIN ANALYZE",
+              "Use Drizzle ORM or Prisma to interact with PostgreSQL from Node.js",
+              "Database migrations and schema versioning strategies",
+              "Redis for caching, sessions and real-time pub/sub messaging",
+            ],
+          },
+          {
+            title: "Week 11–12: Testing, CI/CD & Cloud Deployment",
+            tasks: [
+              "Unit testing with Vitest and integration testing with Supertest",
+              "End-to-end testing with Playwright across multiple browsers",
+              "Set up GitHub Actions for continuous integration on every push",
+              "Containerize your app with Docker and Docker Compose",
+              "Deploy to Replit, Railway or Render with environment variable management",
+              "Performance monitoring with Lighthouse, Web Vitals and Sentry",
+            ],
+          },
+        ],
+      },
+    ],
+    resources: ["The Odin Project (free)", "MDN Web Docs", "React Docs (react.dev)", "Full Stack Open — Helsinki Uni", "freeCodeCamp"],
+    cta: "Full-Stack Web Development",
+  },
+  {
+    id: "cybersecurity",
+    icon: Shield,
+    color: "text-red-500",
+    bg: "bg-red-500/10",
+    border: "border-red-500/20",
+    badge: "🛡️ Cyber Security",
+    title: "Ethical Hacking & Cyber Security: Zero to Certified",
+    subtitle: "Protect systems, find vulnerabilities, and launch a security career",
+    duration: "3 Months",
+    level: "Beginner → Intermediate",
+    overview: `Cybercrime is projected to cost the world $10.5 trillion annually by 2025, making cyber security professionals among the most urgently needed experts on the planet. Ethical hacking — using offensive security techniques to find and fix vulnerabilities before malicious actors exploit them — is one of the highest-paying career paths in technology. This roadmap prepares you for the CEH and CompTIA Security+ certifications while building real practical skills.`,
+    weeks: [
+      {
+        label: "Month 1 — Networking & Linux Fundamentals",
+        milestones: [
+          {
+            title: "Week 1–2: Networking Essentials",
+            tasks: [
+              "Understand the OSI model: 7 layers and their protocols",
+              "Master TCP/IP: handshakes, packets, ports, and sockets",
+              "DNS, DHCP, ARP and how they can be exploited",
+              "Subnetting, CIDR notation and VLSM calculations",
+              "Set up Wireshark to capture and analyze real network traffic",
+              "Understand firewalls, NAT, VPNs and proxy servers",
+            ],
+          },
+          {
+            title: "Week 3–4: Linux for Security Professionals",
+            tasks: [
+              "Navigate the Linux filesystem and understand directory hierarchy",
+              "File permissions: chmod, chown, SUID, SGID, sticky bit",
+              "Process management: ps, top, kill, cron jobs and systemd services",
+              "Bash scripting: write automated security scanning scripts",
+              "Set up Kali Linux in VirtualBox for a dedicated hacking lab",
+              "Essential tools: nmap, netcat, curl, tcpdump, grep and sed",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 2 — Offensive Security & Penetration Testing",
+        milestones: [
+          {
+            title: "Week 5–6: Reconnaissance & Scanning",
+            tasks: [
+              "Passive recon: OSINT with Maltego, Shodan, Google Dorks",
+              "Active scanning with Nmap: TCP SYN scan, OS detection, version scan",
+              "Enumeration: SMB, FTP, HTTP and SNMP service fingerprinting",
+              "Vulnerability scanning with OpenVAS and Nessus Essentials",
+              "Set up a vulnerable target using Metasploitable 2 and DVWA",
+              "Document findings in a professional penetration test report format",
+            ],
+          },
+          {
+            title: "Week 7–8: Exploitation & Post-Exploitation",
+            tasks: [
+              "Understand CVEs, CVSS scoring and the exploit lifecycle",
+              "Use Metasploit Framework: modules, payloads, msfconsole workflow",
+              "Web application attacks: SQL Injection, XSS, CSRF, IDOR (OWASP Top 10)",
+              "Password attacks: dictionary attacks with Hashcat and John the Ripper",
+              "Privilege escalation techniques on Linux and Windows systems",
+              "Maintain access with persistence mechanisms and cover tracks",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 3 — Defense, SOC & Certifications",
+        milestones: [
+          {
+            title: "Week 9–10: Blue Team & Defensive Security",
+            tasks: [
+              "Set up a SIEM with Splunk or ELK Stack to aggregate and analyze logs",
+              "Write detection rules for common attack patterns (Sigma rules)",
+              "Incident response: identification, containment, eradication, recovery",
+              "Malware analysis basics: static and dynamic analysis with Cuckoo Sandbox",
+              "Harden a Linux server: SSH hardening, fail2ban, UFW configuration",
+              "Implement network segmentation and zero-trust architecture principles",
+            ],
+          },
+          {
+            title: "Week 11–12: Certification Prep & Career",
+            tasks: [
+              "Study CompTIA Security+ SY0-701 exam domains and objectives",
+              "Complete TryHackMe's SOC Level 1 path for hands-on practice",
+              "Complete 5 machines on Hack The Box starting with 'Easy' difficulty",
+              "Build a security home lab portfolio with documented write-ups",
+              "Create a LinkedIn profile highlighting CTF wins and lab projects",
+              "Apply for junior roles: SOC Analyst, Penetration Tester, Security Analyst",
+            ],
+          },
+        ],
+      },
+    ],
+    resources: ["TryHackMe (free tier)", "Hack The Box", "CompTIA Security+ Study Guide", "OWASP Top 10", "Professor Messer (free videos)"],
+    cta: "Ethical Hacking",
+  },
+  {
+    id: "datascience",
+    icon: Database,
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    border: "border-purple-500/20",
+    badge: "📊 Data Science",
+    title: "Data Science & Analytics: Extract Insights & Build a Career",
+    subtitle: "Turn raw data into decisions that drive billion-dollar businesses",
+    duration: "3 Months",
+    level: "Beginner → Intermediate",
+    overview: `Data Scientists and Analytics Engineers are the highest-paid roles in many Fortune 500 companies. Every decision made at Google, Netflix, Amazon and Spotify is driven by data analysis. This roadmap takes you through the complete data science pipeline — from SQL and Python to machine learning, data visualization dashboards and business communication of insights — preparing you for roles at leading technology companies.`,
+    weeks: [
+      {
+        label: "Month 1 — Data Foundations",
+        milestones: [
+          {
+            title: "Week 1–2: SQL & Database Querying",
+            tasks: [
+              "Master SELECT statements with WHERE, GROUP BY, HAVING, ORDER BY",
+              "Write complex JOINs: INNER, LEFT, RIGHT, FULL OUTER, CROSS",
+              "Window functions: ROW_NUMBER, RANK, LAG, LEAD, running totals",
+              "Common Table Expressions (CTEs) and recursive queries",
+              "Query optimization with EXPLAIN and index creation strategies",
+              "Practice on Mode Analytics and StrataScratch with real interview questions",
+            ],
+          },
+          {
+            title: "Week 3–4: Python for Data Analysis",
+            tasks: [
+              "Set up Jupyter notebooks and understand literate programming",
+              "NumPy arrays: broadcasting, vectorization and linear algebra operations",
+              "Pandas: DataFrame operations, merge, groupby, pivot tables, reshape",
+              "Data cleaning: handling missing values, duplicates, type conversion",
+              "String processing with regex for unstructured text data cleaning",
+              "Complete a full EDA report on a public dataset from Kaggle",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 2 — Machine Learning & Visualization",
+        milestones: [
+          {
+            title: "Week 5–6: Data Visualization & Storytelling",
+            tasks: [
+              "Create publication-quality charts with Matplotlib and Seaborn",
+              "Build interactive dashboards with Plotly and Dash",
+              "Design principles: color theory, chart selection, data-ink ratio",
+              "Connect to data sources in Tableau Public and build a live dashboard",
+              "Tell a complete data story: problem → analysis → insight → recommendation",
+              "Build a portfolio project: a complete industry analysis dashboard",
+            ],
+          },
+          {
+            title: "Week 7–8: Machine Learning Fundamentals",
+            tasks: [
+              "Understand the bias-variance tradeoff and overfitting/underfitting",
+              "Regression: linear, ridge, lasso, and polynomial regression",
+              "Classification: logistic regression, decision trees, random forests, XGBoost",
+              "Model evaluation: confusion matrix, ROC-AUC, cross-validation",
+              "Feature engineering: encoding, scaling, polynomial features, selection",
+              "Build an end-to-end ML model: data ingestion → training → prediction API",
+            ],
+          },
+        ],
+      },
+      {
+        label: "Month 3 — Advanced Analytics & Career",
+        milestones: [
+          {
+            title: "Week 9–10: Advanced ML & Deep Learning Intro",
+            tasks: [
+              "Natural Language Processing: tokenization, TF-IDF, sentiment analysis",
+              "Time series forecasting with ARIMA, Prophet and LSTM networks",
+              "Clustering: K-Means, DBSCAN, hierarchical clustering",
+              "Introduction to neural networks with Keras: MLP, CNN, RNN",
+              "MLflow for experiment tracking, model versioning and deployment",
+              "Build a complete capstone: predict customer churn with 85%+ accuracy",
+            ],
+          },
+          {
+            title: "Week 11–12: Cloud Platforms & Job Readiness",
+            tasks: [
+              "Deploy ML models as REST APIs using FastAPI and Docker",
+              "AWS basics for data scientists: S3, SageMaker, Redshift, Lambda",
+              "Build an automated data pipeline with Apache Airflow",
+              "Create a professional GitHub portfolio with 5+ documented projects",
+              "Prepare for data science interviews: statistics, SQL, ML concepts",
+              "Apply for roles: Data Analyst, ML Engineer, Business Intelligence Analyst",
+            ],
+          },
+        ],
+      },
+    ],
+    resources: ["Kaggle Learn (free)", "Google Data Analytics Certificate", "StatQuest YouTube", "fast.ai", "Mode Analytics SQL Tutorial"],
+    cta: "Data Science",
+  },
+];
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-12 flex justify-center items-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!stats) {
-    return null;
-  }
-
-  const cards = [
-    {
-      title: "Total Roadmaps",
-      value: stats.totalRoadmaps,
-      icon: Target,
-      desc: "Created on Pathfinder",
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-    },
-    {
-      title: "Completed",
-      value: stats.completedRoadmaps,
-      icon: CheckCircle2,
-      desc: "Fully mastered skills",
-      color: "text-green-500",
-      bg: "bg-green-500/10",
-    },
-    {
-      title: "In Progress",
-      value: stats.inProgressRoadmaps,
-      icon: TrendingUp,
-      desc: "Active learning journeys",
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-    },
-    {
-      title: "Avg Completion",
-      value: `${Math.round(stats.averageCompletion)}%`,
-      icon: Zap,
-      desc: "Across all roadmaps",
-      color: "text-primary",
-      bg: "bg-primary/10",
-    },
-  ];
-
-  const hasRatings = stats.totalRatings > 0 && stats.averageRating !== null;
-
+export default function Trending() {
   return (
     <div className="container mx-auto px-4 md:px-8 py-12 max-w-5xl">
-      <div className="mb-12">
-        <h1 className="text-3xl font-extrabold tracking-tight mb-2">Global Statistics</h1>
-        <p className="text-muted-foreground">See how our community of learners is growing.</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-12 text-center"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold uppercase tracking-wider mb-4">
+          <TrendingUp className="w-4 h-4" />
+          Trending Roadmaps 2026
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+          Most Popular Learning Paths
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Detailed, week-by-week roadmaps for the most in-demand skills of 2026.
+          Curated by industry experts — follow them exactly or generate a personalised version with AI.
+        </p>
+        <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5"><BarChart3 className="w-4 h-4 text-primary" /> 4 complete roadmaps</span>
+          <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-primary" /> Updated May 2026</span>
+          <span className="flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-primary" /> AI-personalised versions available</span>
+        </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {cards.map((card, idx) => (
-          <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 20 }}
+      <AdSenseBanner slot="trending-top" className="mb-10" />
+
+      <div className="space-y-20">
+        {roadmaps.map((rm, idx) => (
+          <motion.article
+            key={rm.id}
+            id={rm.id}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: idx * 0.1 }}
-            className="bg-card border rounded-2xl p-6 shadow-sm flex flex-col"
+            transition={{ delay: idx * 0.1 }}
+            className={`border ${rm.border} rounded-3xl overflow-hidden bg-card shadow-sm`}
           >
-            <div className="flex items-center justify-between mb-4">
-              <span className="font-semibold text-sm text-muted-foreground">{card.title}</span>
-              <div className={`p-2 rounded-lg ${card.bg} ${card.color}`}>
-                <card.icon className="w-5 h-5" />
+            <div className={`${rm.bg} px-8 py-6 border-b ${rm.border}`}>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${rm.bg} ${rm.color} border ${rm.border} mb-3`}>
+                    {rm.badge}
+                  </span>
+                  <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">{rm.title}</h2>
+                  <p className="text-muted-foreground mt-1">{rm.subtitle}</p>
+                </div>
+                <div className="flex gap-4 shrink-0">
+                  <div className="text-center">
+                    <div className="text-2xl font-extrabold">{rm.duration}</div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider">Duration</div>
+                  </div>
+                  <div className="w-px bg-border" />
+                  <div className="text-center">
+                    <div className="text-lg font-bold">{rm.level}</div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider">Level</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="mt-auto">
-              <div className="text-4xl font-extrabold mb-1">{card.value}</div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{card.desc}</p>
+
+            <div className="px-8 py-6">
+              <p className="text-muted-foreground leading-relaxed mb-8">{rm.overview}</p>
+
+              <div className="space-y-8">
+                {rm.weeks.map((week, wi) => (
+                  <div key={wi}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`w-2 h-8 rounded-full ${rm.bg} border ${rm.border}`} />
+                      <h3 className={`text-lg font-bold ${rm.color}`}>{week.label}</h3>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4 ml-5">
+                      {week.milestones.map((m, mi) => (
+                        <div key={mi} className="bg-muted/40 rounded-xl p-5 border border-border/50">
+                          <h4 className="font-semibold text-sm mb-3">{m.title}</h4>
+                          <ul className="space-y-2">
+                            {m.tasks.map((task, ti) => (
+                              <li key={ti} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                <ChevronRight className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${rm.color}`} />
+                                {task}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-6 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Recommended Resources</p>
+                  <div className="flex flex-wrap gap-2">
+                    {rm.resources.map((r, i) => (
+                      <span key={i} className={`text-xs px-2.5 py-1 rounded-md font-medium ${rm.bg} ${rm.color} border ${rm.border}`}>{r}</span>
+                    ))}
+                  </div>
+                </div>
+                <Link href={`/?skill=${encodeURIComponent(rm.cta)}`}>
+                  <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                    Generate AI Version
+                  </button>
+                </Link>
+              </div>
             </div>
-          </motion.div>
+
+            {idx % 2 === 1 && <AdSenseBanner slot={`trending-mid-${idx}`} className="mx-8 mb-6" />}
+          </motion.article>
         ))}
       </div>
 
-      {hasRatings && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.45 }}
-          className="bg-card border rounded-2xl p-6 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-        >
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-              <span className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Community Quality Score</span>
-            </div>
-            <p className="text-xs text-muted-foreground">Based on {stats.totalRatings} rating{stats.totalRatings !== 1 ? "s" : ""} from saved roadmaps</p>
-          </div>
-          <div className="flex flex-col items-start sm:items-end gap-1">
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold">{stats.averageRating?.toFixed(1)}</span>
-              <span className="text-muted-foreground text-sm">/ 5</span>
-            </div>
-            <StarRating value={Math.round(stats.averageRating ?? 0)} readOnly size="sm" showLabel={false} />
-          </div>
-        </motion.div>
-      )}
+      <AdSenseBanner slot="trending-bottom" className="mt-12" />
 
-      {stats.mostPopularSkill && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-          className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8"
-        >
-          <div>
-            <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-2">Community Favorite</h2>
-            <p className="text-3xl md:text-5xl font-extrabold text-foreground">
-              Most Popular Skill: <br/>
-              <span className="text-primary">{stats.mostPopularSkill}</span>
-            </p>
-          </div>
-          <div className="w-full md:w-auto">
-            <div className="bg-background border rounded-2xl p-6 shadow-xl relative overflow-hidden text-center md:text-left min-w-[250px]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10" />
-              <div className="relative z-10">
-                <p className="text-sm font-medium text-muted-foreground mb-1">Start learning</p>
-                <p className="text-xl font-bold mb-4">{stats.mostPopularSkill} today</p>
-                <a href="/" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 w-full">
-                  Create Roadmap
-                </a>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mt-16 text-center bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-3xl p-10"
+      >
+        <h2 className="text-2xl font-extrabold mb-3">Want a Personalised Version?</h2>
+        <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+          Our AI tailors any roadmap to your specific experience level, available time, and learning goals — day by day.
+        </p>
+        <Link href="/">
+          <button className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/90 transition-colors">
+            <Sparkles className="w-5 h-5" />
+            Generate My Roadmap
+          </button>
+        </Link>
+      </motion.div>
     </div>
   );
 }

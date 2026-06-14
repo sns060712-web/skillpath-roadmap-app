@@ -1,125 +1,73 @@
-import { useState } from "react";
-import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { createContext, useContext, useEffect, useState } from "react"
 
-const LABELS = ["Poor", "Fair", "Good", "Great", "Excellent"];
+type Theme = "dark" | "light" | "system"
 
-interface StarRatingProps {
-  value: number | null;
-  onChange?: (rating: number) => void;
-  readOnly?: boolean;
-  size?: "sm" | "md" | "lg";
-  showLabel?: boolean;
-  className?: string;
+type ThemeProviderProps = {
+  children: React.ReactNode
+  defaultTheme?: Theme
+  storageKey?: string
 }
 
-export function StarRating({
-  value,
-  onChange,
-  readOnly = false,
-  size = "md",
-  showLabel = true,
-  className,
-}: StarRatingProps) {
-  const [hovered, setHovered] = useState<number | null>(null);
+type ThemeProviderState = {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+}
 
-  const starSizes = { sm: "w-4 h-4", md: "w-6 h-6", lg: "w-8 h-8" };
-  const gapSizes = { sm: "gap-0.5", md: "gap-1", lg: "gap-1.5" };
-  const starSize = starSizes[size];
-  const gapSize = gapSizes[size];
+const initialState: ThemeProviderState = {
+  theme: "system",
+  setTheme: () => null,
+}
 
-  const active = hovered ?? value ?? 0;
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+
+export function ThemeProvider({
+  children,
+  defaultTheme = "system",
+  storageKey = "vite-ui-theme",
+  ...props
+}: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  )
+
+  useEffect(() => {
+    const root = window.document.documentElement
+
+    root.classList.remove("light", "dark")
+
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light"
+
+      root.classList.add(systemTheme)
+      return
+    }
+
+    root.classList.add(theme)
+  }, [theme])
+
+  const value = {
+    theme,
+    setTheme: (theme: Theme) => {
+      localStorage.setItem(storageKey, theme)
+      setTheme(theme)
+    },
+  }
 
   return (
-    <div className={cn("flex flex-col items-start gap-1", className)}>
-      <div
-        className={cn("flex", gapSize)}
-        onMouseLeave={() => !readOnly && setHovered(null)}
-        role={readOnly ? "img" : "radiogroup"}
-        aria-label={`Rating: ${value ?? 0} out of 5`}
-      >
-        {[1, 2, 3, 4, 5].map((star) => {
-          const filled = star <= active;
-          return (
-            <button
-              key={star}
-              type="button"
-              disabled={readOnly}
-              onMouseEnter={() => !readOnly && setHovered(star)}
-              onClick={() => !readOnly && onChange?.(star)}
-              aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
-              className={cn(
-                "transition-all duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm",
-                readOnly ? "cursor-default" : "cursor-pointer hover:scale-110"
-              )}
-            >
-              <Star
-                className={cn(
-                  starSize,
-                  "transition-colors duration-100",
-                  filled
-                    ? "fill-amber-400 text-amber-400"
-                    : "fill-transparent text-muted-foreground/40"
-                )}
-              />
-            </button>
-          );
-        })}
-      </div>
-
-      {showLabel && !readOnly && (
-        <span className="text-xs text-muted-foreground h-4">
-          {hovered
-            ? LABELS[hovered - 1]
-            : value
-            ? `You rated: ${LABELS[value - 1]}`
-            : "Tap to rate this roadmap"}
-        </span>
-      )}
-    </div>
-  );
+    <ThemeProviderContext.Provider {...props} value={value}>
+      {children}
+    </ThemeProviderContext.Provider>
+  )
 }
 
-interface RatingWidgetProps {
-  roadmapId: number;
-  initialRating: number | null;
-  onRate: (rating: number) => void;
-  isPending?: boolean;
-}
+export const useTheme = () => {
+  const context = useContext(ThemeProviderContext)
 
-export function RatingWidget({
-  roadmapId: _roadmapId,
-  initialRating,
-  onRate,
-  isPending = false,
-}: RatingWidgetProps) {
-  const [submitted, setSubmitted] = useState(false);
-  const hasRated = initialRating !== null || submitted;
+  if (context === undefined)
+    throw new Error("useTheme must be used within a ThemeProvider")
 
-  const handleRate = (rating: number) => {
-    if (isPending) return;
-    onRate(rating);
-    setSubmitted(true);
-  };
-
-  return (
-    <div className="flex flex-col gap-2 p-4 bg-muted/30 border border-border/60 rounded-xl">
-      <div className="flex items-center gap-2">
-        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-        <span className="text-sm font-semibold">
-          {hasRated ? "Thanks for your rating!" : "Was this roadmap helpful?"}
-        </span>
-        {isPending && (
-          <span className="text-xs text-muted-foreground animate-pulse ml-auto">Saving...</span>
-        )}
-      </div>
-      <StarRating
-        value={initialRating}
-        onChange={handleRate}
-        readOnly={hasRated && !isPending}
-        size="md"
-        showLabel={!hasRated}
-      />
-    </div>
-  );
+  return context
 }
