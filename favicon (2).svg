@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>AI Skill Roadmap Generator</title>
+    <meta name="description" content="AI Skill Roadmap Generator — built on Replit. Update this description to reflect the app." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="AI Skill Roadmap Generator" />
+    <meta property="og:description" content="AI Skill Roadmap Generator — built on Replit. Update this description to reflect the app." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Skill Roadmap Generator" />
+    <meta name="twitter:description" content="AI Skill Roadmap Generator — built on Replit. Update this description to reflect the app." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!--
+      ============================================================
+      GOOGLE ADSENSE — PASTE YOUR CODE BELOW THIS COMMENT BLOCK
+      ============================================================
+      1. Go to https://www.google.com/adsense/
+      2. Add your site and get approved
+      3. Copy your AdSense script tag (looks like the example below)
+      4. Paste it here, replacing this comment block
+
+      EXAMPLE (replace ca-pub-XXXXXXXXXXXXXXXX with your Publisher ID):
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+           crossorigin="anonymous"></script>
+
+      Ad placements are already configured in the app at:
+        - Home page top banner  (#adsense-home-top-banner)
+        - Below generated roadmap (#adsense-below-roadmap)
+        - Desktop sidebar rectangle (#adsense-sidebar-rectangle)
+        - Desktop sidebar halfpage  (#adsense-sidebar-halfpage)
+        - Trending page top banner (#adsense-trending-top)
+        - Trending page mid banners (#adsense-trending-mid-*)
+        - Trending page bottom banner (#adsense-trending-bottom)
+      ============================================================
+    -->
+    <!-- Google Analytics GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5FFR2W467R"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5FFR2W467R', { send_page_view: false });
+    </script>
+    <script type="module" crossorigin src="/assets/index-3mtYCZJ7.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BvzmbyMr.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
